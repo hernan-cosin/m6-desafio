@@ -102,7 +102,7 @@ class Code extends HTMLElement {
           margin: 0 auto;
       }    
 
-      @media (min-height: 400px) {
+      @media (min-height: 580px) {
         .main--jugada-container {
           position: absolute;
           width: 100%;
