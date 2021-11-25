@@ -12,6 +12,13 @@ class Home extends HTMLElement {
       e.preventDefault();
       Router.go("/name");
     });
+
+    const enterRoomButtonEl =
+      this.querySelector(".enter-room").shadowRoot.querySelector(".button");
+    enterRoomButtonEl.addEventListener("click", (e) => {
+      e.preventDefault();
+      Router.go("/room");
+    });
   }
   render() {
     this.innerHTML = `

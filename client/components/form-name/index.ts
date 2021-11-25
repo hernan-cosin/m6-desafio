@@ -1,5 +1,3 @@
-import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript";
-
 export function initFormName() {
   class FormName extends HTMLElement {
     shadow: ShadowRoot;
@@ -16,7 +14,7 @@ export function initFormName() {
       form.innerHTML = `
             <label id="name"><c-text class="form--label" variant="body">Tu Nombre</c-text></label>
             <input type="text" id="name" class="input-name">
-            <c-button class="button">Empezar</c-button>
+            <button class="invisible-button"><c-button class="button">Empezar</c-button></button>
             `;
 
       const style = document.createElement("style");
@@ -34,13 +32,27 @@ export function initFormName() {
             }
 
             .input-name {
-                height: 50px;
+                height: 84px;
                 border: 10px solid var(--button-border-darker);
                 border-radius: 10px;
                 margin: 0 0 40px 0;
                 font-size: 32px;
                 padding: 0 0 0 15px;
                 font-family: Odibee Sans, "cursive";
+                box-sizing: border-box;
+            }
+
+            .invisible-button {
+              border: none;
+              background: none;
+            }
+
+            .invisible-button:focus-visible {
+              border: none;
+            }
+
+            .button {
+              display: block;
             }
             `;
       this.shadow.appendChild(form);

@@ -7,8 +7,8 @@ const state = {
   data: {
     name: "",
     //   email: "",
-    //   userId: "",
-    //   roomId: "",
+    userId: "",
+    roomId: "",
     //   rtdbRoomId: "",
     //   messages: [],
   },
@@ -31,14 +31,55 @@ const state = {
     lastState.name = name;
     this.setState(lastState);
   },
-  signin(User: User) {
+  signin(User: User, cb?) {
     fetch(API_BASE_URL + "/signin", {
       method: "post",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(User),
-    });
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        const lastState = this.getState();
+        lastState.userId = data.id;
+        this.setState(lastState);
+        console.log(lastState);
+      })
+      .then(() => {
+        if (cb) {
+          cb();
+        }
+      });
+  },
+  askNewRoom(cb?) {
+    const lastState = this.getState();
+    console.log(lastState);
+
+    if (lastState.userId) {
+      fetch(API_BASE_URL + "/rooms", {
+        method: "post",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ userId: lastState.userId }),
+      })
+        .then((res) => {
+          return res.json();
+        })
+        .then((res) => {
+          const lastState = this.getState();
+          lastState.roomId = res.id;
+          state.setState(lastState);
+          if (cb) {
+            cb();
+          }
+        });
+    } else {
+      console.error("No hay userId");
+    }
   },
 };
 

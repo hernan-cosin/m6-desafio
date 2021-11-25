@@ -459,18 +459,22 @@ var _button = require("./components/button");
 var _formName = require("./components/form-name");
 var _jugada = require("./components/jugada");
 var _text = require("./components/text");
+var _formRoom = require("./components/form-room");
 var _home = require("./pages/home");
 var _name = require("./pages/name");
+var _code = require("./pages/code");
+var _room = require("./pages/room");
 var _router = require("./router");
 function main() {
     _button.initButtom();
     _text.initText();
     _jugada.initPlay();
     _formName.initFormName();
+    _formRoom.initFormRoom();
 }
 main();
 
-},{"./components/button":"2LIbR","./components/jugada":"xZJpl","./components/text":"7QAPx","./pages/home":"e9Za3","./router":"4zXxa","./pages/name":"8g1Nu","./components/form-name":"ghREk"}],"2LIbR":[function(require,module,exports) {
+},{"./components/button":"2LIbR","./components/jugada":"xZJpl","./components/text":"7QAPx","./pages/home":"e9Za3","./router":"4zXxa","./pages/name":"8g1Nu","./components/form-name":"ghREk","./pages/code":"cJ8G0","./components/form-room":"87oyc","./pages/room":"bZinD"}],"2LIbR":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "initButtom", ()=>initButtom
@@ -664,8 +668,9 @@ function initText() {
             texto.textContent = this.textContent;
             let variant = this.getAttribute("variant") || "body";
             texto.className = variant;
+            let custom = this.getAttribute("custom");
             const style = document.createElement("style");
-            style.innerHTML = `\n                  .title {\n                      font-size: 66px;\n                      margin: 0;\n                  }\n                  \n                  .subtitle {\n                      font-size: 55px;\n                      margin: 0;\n                  }\n                  \n                  .body {\n                      font-size: 40px;\n                      margin: 0;\n                  }             \n              `;
+            style.innerHTML = `\n                  .title {\n                      font-size: 66px;\n                      margin: 0;\n                  }\n                  \n                  .subtitle {\n                      font-size: 55px;\n                      margin: 0;\n                  }\n                  \n                  .body {\n                      font-size: 40px;\n                      margin: 0;\n                  }\n                  \n                  .custom {\n                    font-size: ${custom}px;\n                    margin: 0;\n                  }\n              `;
             this.shadow.appendChild(texto);
             this.shadow.appendChild(style);
         }
@@ -687,6 +692,11 @@ class Home extends HTMLElement {
         newGameButtonEl.addEventListener("click", (e)=>{
             e.preventDefault();
             _router.Router.go("/name");
+        });
+        const enterRoomButtonEl = this.querySelector(".enter-room").shadowRoot.querySelector(".button");
+        enterRoomButtonEl.addEventListener("click", (e)=>{
+            e.preventDefault();
+            _router.Router.go("/room");
         });
     }
     render() {
@@ -3070,27 +3080,43 @@ router.setRoutes([
         component: "name-page"
     },
     {
-        path: "/users/:user",
-        component: "x-user-profile"
+        path: "/code",
+        component: "code-page"
+    },
+    {
+        path: "/room",
+        component: "room-page"
     }, 
 ]);
 
 },{"@vaadin/router":"kFgop"}],"8g1Nu":[function(require,module,exports) {
 // const bg = require("url:../../media/bg.svg");
+var _router = require("@vaadin/router");
 var _state = require("../../state");
 var _home = require("../home");
 class Name extends HTMLElement {
     connectedCallback() {
         this.render();
+        const formEl = this.querySelector(".main--form").shadowRoot.querySelector(".form");
         const inputEl = this.querySelector(".main--form").shadowRoot.querySelector(".input-name");
         const buttonEl = this.querySelector(".main--form").shadowRoot.querySelector(".button");
+        formEl.addEventListener("submit", (e)=>{
+            e.preventDefault();
+        });
         buttonEl.addEventListener("click", (e)=>{
             e.preventDefault;
             _state.state.setName(inputEl.value);
             const userData = {
                 name: inputEl.value
             };
-            _state.state.signin(userData);
+            _state.state.signin(userData, ()=>{
+                _state.state.askNewRoom(()=>{
+                    _router.Router.go("/code");
+                });
+            });
+        });
+        buttonEl.addEventListener("click", (e)=>{
+            e.preventDefault();
         });
     }
     render() {
@@ -3102,7 +3128,7 @@ class Name extends HTMLElement {
 }
 customElements.define("name-page", Name);
 
-},{"../home":"e9Za3","../../state":"4KTlf"}],"4KTlf":[function(require,module,exports) {
+},{"../home":"e9Za3","../../state":"4KTlf","@vaadin/router":"kFgop"}],"4KTlf":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "state", ()=>state
@@ -3110,7 +3136,10 @@ parcelHelpers.export(exports, "state", ()=>state
 const API_BASE_URL = "http://localhost:3000";
 const state = {
     data: {
-        name: ""
+        name: "",
+        //   email: "",
+        userId: "",
+        roomId: ""
     },
     listeners: [],
     getState () {
@@ -3129,14 +3158,44 @@ const state = {
         lastState.name = name;
         this.setState(lastState);
     },
-    signin (User) {
+    signin (User, cb) {
         fetch(API_BASE_URL + "/signin", {
             method: "post",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(User)
+        }).then((res)=>{
+            return res.json();
+        }).then((data)=>{
+            const lastState = this.getState();
+            lastState.userId = data.id;
+            this.setState(lastState);
+            console.log(lastState);
+        }).then(()=>{
+            if (cb) cb();
         });
+    },
+    askNewRoom (cb) {
+        const lastState = this.getState();
+        console.log(lastState);
+        if (lastState.userId) fetch(API_BASE_URL + "/rooms", {
+            method: "post",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                userId: lastState.userId
+            })
+        }).then((res)=>{
+            return res.json();
+        }).then((res)=>{
+            const lastState1 = this.getState();
+            lastState1.roomId = res.id;
+            state.setState(lastState1);
+            if (cb) cb();
+        });
+        else console.error("No hay userId");
     }
 };
 
@@ -3159,9 +3218,9 @@ function initFormName() {
         render() {
             const form = document.createElement("form");
             form.setAttribute("class", "form");
-            form.innerHTML = `\n            <label id="name"><c-text class="form--label" variant="body">Tu Nombre</c-text></label>\n            <input type="text" id="name" class="input-name">\n            <c-button class="button">Empezar</c-button>\n            `;
+            form.innerHTML = `\n            <label id="name"><c-text class="form--label" variant="body">Tu Nombre</c-text></label>\n            <input type="text" id="name" class="input-name">\n            <button class="invisible-button"><c-button class="button">Empezar</c-button></button>\n            `;
             const style = document.createElement("style");
-            style.innerHTML = `\n            .form{\n                display: flex;\n                flex-direction: column;\n                min-width: 280px;\n                max-width: 337px;\n            }\n\n            .form--label {\n                font-family: Odibee Sans, "cursive";\n                text-align: center;\n            }\n\n            .input-name {\n                height: 50px;\n                border: 10px solid var(--button-border-darker);\n                border-radius: 10px;\n                margin: 0 0 40px 0;\n                font-size: 32px;\n                padding: 0 0 0 15px;\n                font-family: Odibee Sans, "cursive";\n            }\n            `;
+            style.innerHTML = `\n            .form{\n                display: flex;\n                flex-direction: column;\n                min-width: 280px;\n                max-width: 337px;\n            }\n\n            .form--label {\n                font-family: Odibee Sans, "cursive";\n                text-align: center;\n            }\n\n            .input-name {\n                height: 84px;\n                border: 10px solid var(--button-border-darker);\n                border-radius: 10px;\n                margin: 0 0 40px 0;\n                font-size: 32px;\n                padding: 0 0 0 15px;\n                font-family: Odibee Sans, "cursive";\n                box-sizing: border-box;\n            }\n\n            .invisible-button {\n              border: none;\n              background: none;\n            }\n\n            .invisible-button:focus-visible {\n              border: none;\n            }\n\n            .button {\n              display: block;\n            }\n            `;
             this.shadow.appendChild(form);
             this.shadow.appendChild(style);
         }
@@ -3169,6 +3228,90 @@ function initFormName() {
     customElements.define("form-name", FormName);
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}]},["gcK6j","4L6tv"], "4L6tv", "parcelRequireca0a")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"cJ8G0":[function(require,module,exports) {
+var _home = require("../home");
+var _state = require("../../state");
+class Code extends HTMLElement {
+    connectedCallback() {
+        this.render();
+    }
+    render() {
+        const lastState = _state.state.getState();
+        this.innerHTML = `\n        <section class="main">\n          <header class="main--header">\n            <div class="header--names-container">\n              <c-text variant="custom" custom="24" class="header--name">${lastState.name}: ${lastState.score ? lastState.score : " 0"}</c-text>\n            </div>\n            <div class="header--room-container">\n              <c-text variant="custom" custom="24" class="room-text">Sala</c-text>\n              <c-text variant="custom" custom="24" class="roomId">${lastState.roomId}</c-text>\n            </div>\n          </header>\n          <section class="code-info">\n              <c-text variant="custom" custom="35" class="info ">Compartí el codigo:</c-text>\n              <c-text variant="custom" custom="48" class="info ">${lastState.roomId}</c-text>\n              <c-text variant="custom" custom="35" class="info ">Con tu contrincante</c-text>\n          </section>\n          <div class="main--jugada-container">\n            <c-play class="jugada piedra" play="piedra"></c-play>\n            <c-play class="jugada papel" play="papel"></c-play>\n            <c-play class="jugada tijera" play="tijera"></c-play>\n          </div>\n        </section>\n\n        `;
+        const style = document.createElement("style");
+        style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 30px 0 0 0;\n        }\n\n        .main--header {\n          display: flex;\n          justify-content: space-between;\n          font-family: 'Special Elite';\n          column-gap: 30px;\n          max-width: 960px;\n          margin: 0 auto 110px auto ;\n          padding: 0 30px;\n        }\n\n        @media (min-width: 769px) {\n          .main--header {\n            margin: 0 auto 180px auto;\n          }\n        }\n          \n        .header--name {\n          display: block;\n          font-family: 'Special Elite', cursive;\n        }\n\n        .room-text {\n          font-weight: bold;\n        }\n        \n        .roomId {\n          font-weight: bold;\n        }\n\n        .code-info {\n          max-width: 960px;\n          margin: 0 auto;\n          text-align: center;\n        }\n\n        .info {\n          display: block;\n          font-family: 'Special Elite', cursive;\n          font-weight: bold;\n          margin: 0 0 30px 0 ;\n        }\n\n        .main--jugada-container {\n          display: flex;\n          justify-content: space-between;\n          align-items: flex-end;\n          width: 90%;\n          max-width: 390px;\n          margin: 0 auto;\n      }    \n\n      @media (min-height: 400px) {\n        .main--jugada-container {\n          position: absolute;\n          width: 100%;\n          bottom: 0;\n          left: 50%;\n          transform: translate(-50%, 0);\n        }\n      }\n        `;
+        this.appendChild(style);
+    }
+}
+customElements.define("code-page", Code);
+
+},{"../home":"e9Za3","../../state":"4KTlf"}],"87oyc":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "initFormRoom", ()=>initFormRoom
+);
+function initFormRoom() {
+    class FormRoom extends HTMLElement {
+        constructor(){
+            super();
+            this.shadow = this.attachShadow({
+                mode: "open"
+            });
+        }
+        connectedCallback() {
+            this.render();
+        }
+        render() {
+            const form = document.createElement("form");
+            form.setAttribute("class", "form");
+            form.innerHTML = `\n              <input type="text" class="input-room-code" placeholder="código">\n              <button class="invisible-button"><c-button class="button">Ingresar a la sala</c-button></button>\n              `;
+            const style = document.createElement("style");
+            style.innerHTML = `\n              .form{\n                  display: flex;\n                  flex-direction: column;\n                  min-width: 280px;\n                  max-width: 337px;\n              }\n              \n              .input-room-code {\n                  height: 84px;\n                  border: 10px solid var(--button-border-darker);\n                  border-radius: 10px;\n                  margin: 0 0 40px 0;\n                  font-size: 32px;\n                  padding: 0;\n                  font-family: Odibee Sans, "cursive";\n                  box-sizing: border-box;\n              }\n\n              ::-webkit-input-placeholder{\n                font-size: 45px;\n                text-align: center;\n                color: #D9D9D9;\n              }\n  \n              .invisible-button {\n                border: none;\n                background: none;\n              }\n  \n              .invisible-button:focus-visible {\n                border: none;\n              }\n\n              .button {\n                display: block;\n              }\n              `;
+            this.shadow.appendChild(form);
+            this.shadow.appendChild(style);
+        }
+    }
+    customElements.define("form-room", FormRoom);
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"bZinD":[function(require,module,exports) {
+var _router = require("@vaadin/router");
+var _state = require("../../state");
+var _home = require("../home");
+class Room extends HTMLElement {
+    connectedCallback() {
+        this.render();
+        const formEl = this.querySelector(".main--form").shadowRoot.querySelector(".form");
+        const inputEl = this.querySelector(".main--form").shadowRoot.querySelector(".input-name");
+        const buttonEl = this.querySelector(".main--form").shadowRoot.querySelector(".button");
+        formEl.addEventListener("submit", (e)=>{
+            e.preventDefault();
+        });
+        buttonEl.addEventListener("click", (e)=>{
+            e.preventDefault;
+            _state.state.setName(inputEl.value);
+            const userData = {
+                name: inputEl.value
+            };
+            _state.state.signin(userData, ()=>{
+                _state.state.askNewRoom(()=>{
+                    _router.Router.go("/code");
+                });
+            });
+        });
+        buttonEl.addEventListener("click", (e)=>{
+            e.preventDefault();
+        });
+    }
+    render() {
+        this.innerHTML = `\n        <section class="main">\n            <c-text class="main--title" variant="title"> Piedra Papel ó Tijera </c-text>\n            <form-room class="main--form"></form-room>\n        </section>\n\n        `;
+        const style = document.createElement("style");
+        style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 70px 0 0 0;\n        }\n\n        @media (min-width: 769px) {\n          .main{\n            padding: 60px 0 0 0;\n          }\n        }\n\n        .main--title {\n            display: block;\n            min-width: 270px;\n            max-width: 280px;\n            margin: 0 auto 55px auto;\n            color: var(--principal);\n            font-family: 'Special Elite', cursive;\n        }\n\n        .main--form {\n            display: block;\n            width: fit-content;\n            margin: 0 auto;\n        }\n        `;
+        this.appendChild(style);
+    }
+}
+customElements.define("room-page", Room);
+
+},{"@vaadin/router":"kFgop","../../state":"4KTlf","../home":"e9Za3"}]},["gcK6j","4L6tv"], "4L6tv", "parcelRequireca0a")
 
 //# sourceMappingURL=index.39c327d2.js.map

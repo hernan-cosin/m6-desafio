@@ -1,9 +1,8 @@
-// const bg = require("url:../../media/bg.svg");
 import { Router } from "@vaadin/router";
 import { state } from "../../state";
 import { bg } from "../home";
 
-class Name extends HTMLElement {
+class Room extends HTMLElement {
   shadow: ShadowRoot;
   connectedCallback() {
     this.render();
@@ -40,7 +39,7 @@ class Name extends HTMLElement {
     this.innerHTML = `
         <section class="main">
             <c-text class="main--title" variant="title"> Piedra Papel ó Tijera </c-text>
-            <form-name class="main--form"></form-name>
+            <form-room class="main--form"></form-room>
         </section>
 
         `;
@@ -80,4 +79,4 @@ class Name extends HTMLElement {
     this.appendChild(style);
   }
 }
-customElements.define("name-page", Name);
+customElements.define("room-page", Room);

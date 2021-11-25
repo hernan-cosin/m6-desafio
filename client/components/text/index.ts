@@ -14,6 +14,7 @@ export function initText() {
 
       let variant = this.getAttribute("variant") || "body";
       texto.className = variant;
+      let custom = this.getAttribute("custom");
 
       const style = document.createElement("style");
       style.innerHTML = `
@@ -30,7 +31,12 @@ export function initText() {
                   .body {
                       font-size: 40px;
                       margin: 0;
-                  }             
+                  }
+                  
+                  .custom {
+                    font-size: ${custom}px;
+                    margin: 0;
+                  }
               `;
       this.shadow.appendChild(texto);
       this.shadow.appendChild(style);
