@@ -76,6 +76,7 @@ class Code extends HTMLElement {
         }
         
         .roomId {
+          text-align: right;
           font-weight: bold;
         }
 
