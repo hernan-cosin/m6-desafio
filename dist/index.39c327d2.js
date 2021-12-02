@@ -3133,7 +3133,8 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "state", ()=>state
 );
-const API_BASE_URL = "http://localhost:3000";
+// const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "";
 const state = {
     data: {
         name: "",
@@ -3171,14 +3172,12 @@ const state = {
             const lastState = this.getState();
             lastState.userId = data.id;
             this.setState(lastState);
-            console.log(lastState);
         }).then(()=>{
             if (cb) cb();
         });
     },
     askNewRoom (cb) {
         const lastState = this.getState();
-        console.log(lastState);
         if (lastState.userId) fetch(API_BASE_URL + "/rooms", {
             method: "post",
             headers: {
@@ -3193,7 +3192,10 @@ const state = {
             const lastState1 = this.getState();
             lastState1.roomId = res.id;
             state.setState(lastState1);
-            if (cb) cb();
+            if (cb) {
+                cb();
+                console.log(state.getState());
+            }
         });
         else console.error("No hay userId");
     }
@@ -3239,7 +3241,7 @@ class Code extends HTMLElement {
         const lastState = _state.state.getState();
         this.innerHTML = `\n        <section class="main">\n          <header class="main--header">\n            <div class="header--names-container">\n              <c-text variant="custom" custom="24" class="header--name">${lastState.name}: ${lastState.score ? lastState.score : " 0"}</c-text>\n            </div>\n            <div class="header--room-container">\n              <c-text variant="custom" custom="24" class="room-text">Sala</c-text>\n              <c-text variant="custom" custom="24" class="roomId">${lastState.roomId}</c-text>\n            </div>\n          </header>\n          <section class="code-info">\n              <c-text variant="custom" custom="35" class="info ">Compartí el codigo:</c-text>\n              <c-text variant="custom" custom="48" class="info ">${lastState.roomId}</c-text>\n              <c-text variant="custom" custom="35" class="info ">Con tu contrincante</c-text>\n          </section>\n          <div class="main--jugada-container">\n            <c-play class="jugada piedra" play="piedra"></c-play>\n            <c-play class="jugada papel" play="papel"></c-play>\n            <c-play class="jugada tijera" play="tijera"></c-play>\n          </div>\n        </section>\n\n        `;
         const style = document.createElement("style");
-        style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 30px 0 0 0;\n        }\n\n        .main--header {\n          display: flex;\n          justify-content: space-between;\n          font-family: 'Special Elite';\n          column-gap: 30px;\n          max-width: 960px;\n          margin: 0 auto 110px auto ;\n          padding: 0 30px;\n        }\n\n        @media (min-width: 769px) {\n          .main--header {\n            margin: 0 auto 180px auto;\n          }\n        }\n          \n        .header--name {\n          display: block;\n          font-family: 'Special Elite', cursive;\n        }\n\n        .room-text {\n          font-weight: bold;\n        }\n        \n        .roomId {\n          font-weight: bold;\n        }\n\n        .code-info {\n          max-width: 960px;\n          margin: 0 auto;\n          text-align: center;\n        }\n\n        .info {\n          display: block;\n          font-family: 'Special Elite', cursive;\n          font-weight: bold;\n          margin: 0 0 30px 0 ;\n        }\n\n        .main--jugada-container {\n          display: flex;\n          justify-content: space-between;\n          align-items: flex-end;\n          width: 90%;\n          max-width: 390px;\n          margin: 0 auto;\n      }    \n\n      @media (min-height: 400px) {\n        .main--jugada-container {\n          position: absolute;\n          width: 100%;\n          bottom: 0;\n          left: 50%;\n          transform: translate(-50%, 0);\n        }\n      }\n        `;
+        style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 30px 0 0 0;\n        }\n\n        .main--header {\n          display: flex;\n          justify-content: space-between;\n          font-family: 'Special Elite';\n          column-gap: 30px;\n          max-width: 960px;\n          margin: 0 auto 110px auto ;\n          padding: 0 30px;\n        }\n\n        @media (min-width: 769px) {\n          .main--header {\n            margin: 0 auto 180px auto;\n          }\n        }\n          \n        .header--name {\n          display: block;\n          font-family: 'Special Elite', cursive;\n        }\n\n        .room-text {\n          font-weight: bold;\n        }\n        \n        .roomId {\n          text-align: right;\n          font-weight: bold;\n        }\n\n        .code-info {\n          max-width: 960px;\n          margin: 0 auto;\n          text-align: center;\n        }\n\n        .info {\n          display: block;\n          font-family: 'Special Elite', cursive;\n          font-weight: bold;\n          margin: 0 0 30px 0 ;\n        }\n\n        .main--jugada-container {\n          display: flex;\n          justify-content: space-between;\n          align-items: flex-end;\n          width: 90%;\n          max-width: 390px;\n          margin: 0 auto;\n      }    \n\n      @media (min-height: 580px) {\n        .main--jugada-container {\n          position: absolute;\n          width: 100%;\n          bottom: 0;\n          left: 50%;\n          transform: translate(-50%, 0);\n        }\n      }\n        `;
         this.appendChild(style);
     }
 }

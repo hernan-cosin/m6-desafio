@@ -63,16 +63,8 @@ app.post("/rooms", (req, res) => {
           })
           .then(() => {
             const roomLongId = roomRef.key;
-            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const randomCharacter =
-              alphabet[Math.floor(Math.random() * alphabet.length)];
-            const randomCharacter2 =
-              alphabet[Math.floor(Math.random() * alphabet.length)];
-            const randomNumber = Math.floor(Math.random() * 99);
-            const randomNumber2 = Math.floor(Math.random() * 99);
-            const roomId =
-              randomNumber + randomCharacter + randomCharacter2 + randomNumber2;
-            // const roomId = 1000 + Math.floor(Math.random() * 999);
+            const roomId = generateRoomId();
+
             roomsCollection
               .doc(roomId.toString())
               .set({
@@ -101,3 +93,15 @@ app.get("*", (req, res) => {
 app.listen(port, () => {
   console.log(`App running in port ${port}`);
 });
+
+function generateRoomId() {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const randomCharacter = alphabet[Math.floor(Math.random() * alphabet.length)];
+  const randomCharacter2 =
+    alphabet[Math.floor(Math.random() * alphabet.length)];
+  const randomNumber = Math.floor(Math.random() * 99);
+  const randomNumber2 = Math.floor(Math.random() * 99);
+  const roomId =
+    randomNumber + randomCharacter + randomCharacter2 + randomNumber2;
+  return roomId;
+}

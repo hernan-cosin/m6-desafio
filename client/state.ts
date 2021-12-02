@@ -46,7 +46,6 @@ const state = {
         const lastState = this.getState();
         lastState.userId = data.id;
         this.setState(lastState);
-        console.log(lastState);
       })
       .then(() => {
         if (cb) {
@@ -56,7 +55,6 @@ const state = {
   },
   askNewRoom(cb?) {
     const lastState = this.getState();
-    console.log(lastState);
 
     if (lastState.userId) {
       fetch(API_BASE_URL + "/rooms", {
@@ -75,6 +73,7 @@ const state = {
           state.setState(lastState);
           if (cb) {
             cb();
+            console.log(state.getState());
           }
         });
     } else {
