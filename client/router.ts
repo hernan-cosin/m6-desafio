@@ -7,4 +7,6 @@ router.setRoutes([
   { path: "/name", component: "name-page" },
   { path: "/code", component: "code-page" },
   { path: "/room", component: "room-page" },
+  { path: "/press-play", component: "press-play-page" },
+  { path: "/waiting-room", component: "waiting-room-page" },
 ]);

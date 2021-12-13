@@ -31,7 +31,7 @@ export function initFormRoom() {
                   border-radius: 10px;
                   margin: 0 0 40px 0;
                   font-size: 32px;
-                  padding: 0;
+                  padding: 0 0 0 15px;
                   font-family: Odibee Sans, "cursive";
                   box-sizing: border-box;
               }

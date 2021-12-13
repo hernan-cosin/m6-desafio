@@ -8,6 +8,8 @@ import "./pages/home";
 import "./pages/name";
 import "./pages/code";
 import "./pages/room";
+import "./pages/press-play";
+import "./pages/waiting-room";
 import "./router";
 
 function main() {

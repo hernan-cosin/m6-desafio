@@ -10,7 +10,7 @@ class Room extends HTMLElement {
     const formEl =
       this.querySelector(".main--form").shadowRoot.querySelector(".form");
     const inputEl = this.querySelector(".main--form").shadowRoot.querySelector(
-      ".input-name"
+      ".input-room-code"
     ) as any;
 
     const buttonEl =
@@ -22,13 +22,18 @@ class Room extends HTMLElement {
 
     buttonEl.addEventListener("click", (e) => {
       e.preventDefault;
-      state.setName(inputEl.value);
-      const userData = { name: inputEl.value };
-      state.signin(userData, () => {
-        state.askNewRoom(() => {
-          Router.go("/code");
-        });
-      });
+
+      if (inputEl.value.length == 0) {
+        return;
+      } else {
+        const roomId = inputEl.value.toString();
+        state.setRoomId(roomId);
+
+        const haveName = state.getState().name;
+        if (!haveName) {
+          Router.go("/name");
+        }
+      }
     });
 
     buttonEl.addEventListener("click", (e) => {

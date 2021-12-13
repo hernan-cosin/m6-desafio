@@ -1,5 +1,6 @@
 // const bg = require("url:../../media/bg.svg");
 import { Router } from "@vaadin/router";
+import { initFormRoom } from "../../components/form-room";
 import { state } from "../../state";
 import { bg } from "../home";
 
@@ -10,6 +11,7 @@ class Name extends HTMLElement {
 
     const formEl =
       this.querySelector(".main--form").shadowRoot.querySelector(".form");
+
     const inputEl = this.querySelector(".main--form").shadowRoot.querySelector(
       ".input-name"
     ) as any;
@@ -23,13 +25,31 @@ class Name extends HTMLElement {
 
     buttonEl.addEventListener("click", (e) => {
       e.preventDefault;
-      state.setName(inputEl.value);
-      const userData = { name: inputEl.value };
-      state.signin(userData, () => {
-        state.askNewRoom(() => {
-          Router.go("/code");
+
+      if (inputEl.value.length == 0) {
+        return;
+      } else {
+        state.setName(inputEl.value);
+        const lastState = state.getState();
+
+        const userData = { name: inputEl.value };
+
+        state.signin(userData, () => {
+          if (state.getState().roomId.length > 0) {
+            state.connectToRoom(() => {
+              state.accessToRoom(() => {
+                Router.go("/code");
+              });
+            });
+          } else {
+            state.askNewRoom(() => {
+              state.connectToRoom(() => {
+                Router.go("/code");
+              });
+            });
+          }
         });
-      });
+      }
     });
 
     buttonEl.addEventListener("click", (e) => {
