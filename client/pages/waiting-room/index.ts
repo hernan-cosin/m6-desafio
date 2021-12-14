@@ -6,11 +6,16 @@ class WaitingRoom extends HTMLElement {
   shadow: ShadowRoot;
   players: { name: string }[] = [];
   connectedCallback() {
+    state.subscribe(() => {
+      state.readyToPlay(() => {
+        Router.go("/choice");
+      });
+    });
     this.render();
   }
   render() {
     state.readyToPlay(() => {
-      Router.go("/game");
+      Router.go("/choice");
     });
     const lastState = state.getState();
 

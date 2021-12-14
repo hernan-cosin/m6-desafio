@@ -2,6 +2,7 @@ import { initButtom } from "./components/button";
 import { initFormName } from "./components/form-name";
 import { initPlay } from "./components/jugada";
 import { initText } from "./components/text";
+import { initCounter } from "./components/counter";
 import { initFormRoom } from "./components/form-room";
 
 import "./pages/home";
@@ -10,6 +11,7 @@ import "./pages/code";
 import "./pages/room";
 import "./pages/press-play";
 import "./pages/waiting-room";
+import "./pages/choice";
 import "./router";
 
 function main() {
@@ -18,6 +20,7 @@ function main() {
   initPlay();
   initFormName();
   initFormRoom();
+  initCounter();
 }
 
 main();

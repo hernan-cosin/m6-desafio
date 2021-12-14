@@ -1,7 +1,7 @@
 import { rtdb } from "./rtdb";
 import map from "lodash/map";
-// const API_BASE_URL = "http://localhost:3000";
-const API_BASE_URL = "";
+const API_BASE_URL = "http://localhost:3000";
+// const API_BASE_URL = "";
 type User = {
   name: string;
 };
@@ -226,12 +226,12 @@ const state = {
     const lastState = this.getState();
 
     const chatroomRef = rtdb.ref("/rooms/" + lastState.rtdbRoomId);
-    chatroomRef.once("value", (snap) => {
+    chatroomRef.on("value", (snap) => {
       const playersFromServer = snap.val()["current-game"];
 
-      const online = map(playersFromServer, "start");
+      const start = map(playersFromServer, "start");
 
-      if (online[0] == true && online[1] == true) {
+      if (start[0] == true && start[1] == true) {
         cb();
       }
     });

@@ -459,6 +459,7 @@ var _button = require("./components/button");
 var _formName = require("./components/form-name");
 var _jugada = require("./components/jugada");
 var _text = require("./components/text");
+var _counter = require("./components/counter");
 var _formRoom = require("./components/form-room");
 var _home = require("./pages/home");
 var _name = require("./pages/name");
@@ -466,6 +467,7 @@ var _code = require("./pages/code");
 var _room = require("./pages/room");
 var _pressPlay = require("./pages/press-play");
 var _waitingRoom = require("./pages/waiting-room");
+var _choice = require("./pages/choice");
 var _router = require("./router");
 function main() {
     _button.initButtom();
@@ -473,10 +475,11 @@ function main() {
     _jugada.initPlay();
     _formName.initFormName();
     _formRoom.initFormRoom();
+    _counter.initCounter();
 }
 main();
 
-},{"./components/button":"2LIbR","./components/jugada":"xZJpl","./components/text":"7QAPx","./pages/home":"e9Za3","./router":"4zXxa","./pages/name":"8g1Nu","./components/form-name":"ghREk","./pages/code":"cJ8G0","./components/form-room":"87oyc","./pages/room":"bZinD","./pages/press-play":"gNShy","./pages/waiting-room":"lmp3n"}],"2LIbR":[function(require,module,exports) {
+},{"./components/button":"2LIbR","./components/jugada":"xZJpl","./components/text":"7QAPx","./pages/home":"e9Za3","./router":"4zXxa","./pages/name":"8g1Nu","./components/form-name":"ghREk","./pages/code":"cJ8G0","./components/form-room":"87oyc","./pages/room":"bZinD","./pages/press-play":"gNShy","./pages/waiting-room":"lmp3n","./pages/choice":"bQKzh","./components/counter":"jek4p"}],"2LIbR":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "initButtom", ()=>initButtom
@@ -3096,6 +3099,10 @@ router.setRoutes([
     {
         path: "/waiting-room",
         component: "waiting-room-page"
+    },
+    {
+        path: "/choice",
+        component: "game-choice-page"
     }, 
 ]);
 
@@ -3157,8 +3164,7 @@ parcelHelpers.export(exports, "state", ()=>state
 var _rtdb = require("./rtdb");
 var _map = require("lodash/map");
 var _mapDefault = parcelHelpers.interopDefault(_map);
-// const API_BASE_URL = "http://localhost:3000";
-const API_BASE_URL = "";
+const API_BASE_URL = "http://localhost:3000";
 const state = {
     data: {
         name: "",
@@ -3324,10 +3330,10 @@ const state = {
     readyToPlay (cb) {
         const lastState = this.getState();
         const chatroomRef = _rtdb.rtdb.ref("/rooms/" + lastState.rtdbRoomId);
-        chatroomRef.once("value", (snap)=>{
+        chatroomRef.on("value", (snap)=>{
             const playersFromServer = snap.val()["current-game"];
-            const online = _mapDefault.default(playersFromServer, "start");
-            if (online[0] == true && online[1] == true) cb();
+            const start = _mapDefault.default(playersFromServer, "start");
+            if (start[0] == true && start[1] == true) cb();
         });
     }
 };
@@ -64660,11 +64666,16 @@ var _state = require("../../state");
 var _home = require("../home");
 class WaitingRoom extends HTMLElement {
     connectedCallback() {
+        _state.state.subscribe(()=>{
+            _state.state.readyToPlay(()=>{
+                _router.Router.go("/choice");
+            });
+        });
         this.render();
     }
     render() {
         _state.state.readyToPlay(()=>{
-            _router.Router.go("/game");
+            _router.Router.go("/choice");
         });
         const lastState = _state.state.getState();
         this.innerHTML = `\n        <section class="main">\n            <header class="main--header">\n                <div class="header--names-container">\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[0] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[1] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  </div>\n                <div class="header--room-container">\n                  <c-text variant="custom" custom="24" class="room-text">Sala</c-text>\n                  <c-text variant="custom" custom="24" class="roomId">${lastState.roomId}</c-text>\n              </div>\n            </header>\n            <section class="game-info">\n                <c-text variant="custom" custom="35" class="info ">Esperando a que ${lastState.players[0] == lastState.name ? lastState.players[1] : lastState.players[0]} presione jugar</c-text>\n            </section>\n            <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedra"></c-play>\n              <c-play class="jugada papel" play="papel"></c-play>\n              <c-play class="jugada tijera" play="tijera"></c-play>\n            </div>\n        </section>\n\n        `;
@@ -64679,6 +64690,79 @@ class WaitingRoom extends HTMLElement {
 }
 customElements.define("waiting-room-page", WaitingRoom);
 
-},{"../../state":"4KTlf","../home":"e9Za3","@vaadin/router":"kFgop"}]},["gcK6j","4L6tv"], "4L6tv", "parcelRequireca0a")
+},{"../../state":"4KTlf","../home":"e9Za3","@vaadin/router":"kFgop"}],"bQKzh":[function(require,module,exports) {
+var _state = require("../../state");
+var _home = require("../home");
+class Choice extends HTMLElement {
+    connectedCallback() {
+        this.render();
+    }
+    render() {
+        // state.readyToPlay(() => {
+        //   Router.go("/game");
+        // });
+        const lastState = _state.state.getState();
+        this.innerHTML = `\n        <section class="main">\n            <!-- <header class="main--header">\n                <div class="header--names-container">\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[0] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[1] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  </div>\n                <div class="header--room-container">\n                  <c-text variant="custom" custom="24" class="room-text">Sala</c-text>\n                  <c-text variant="custom" custom="24" class="roomId">${lastState.roomId}</c-text>\n              </div>\n            </header>\n            <section class="game-info">\n                <c-text variant="custom" custom="35" class="info ">Esperando a que ${lastState.players[0] == lastState.name ? lastState.players[1] : lastState.players[0]} presione jugar</c-text>\n            </section> -->\n            <c-counter class="counter"></c-counter>\n            <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedraLarge"></c-play>\n              <c-play class="jugada papel" play="papelLarge"></c-play>\n              <c-play class="jugada tijera" play="tijeraLarge"></c-play>\n            </div>\n        </section>\n\n        `;
+        const style = document.createElement("style");
+        style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 40px 0 0 0;\n        }\n\n       /* @media (min-width: 769px) {\n          .main{\n            padding: 60px 0 0 0;\n          }\n        } */\n\n        .main--header {\n          display: flex;\n          justify-content: space-between;\n          font-family: 'Special Elite';\n          column-gap: 30px;\n          max-width: 960px;\n          margin: 0 auto 50px auto ;\n          padding: 0 30px;\n        }\n\n        @media (min-width: 769px) {\n          .main--header {\n            margin: 0 auto 60px auto;\n          }\n        }\n          \n        .header--name {\n          display: block;\n          font-family: 'Special Elite', cursive;\n        }\n\n        .room-text {\n          font-weight: bold;\n        }\n        \n        .roomId {\n          text-align: right;\n          font-weight: bold;\n        }\n\n        .game-info {\n          max-width: 960px;\n          margin: 0 auto;\n          text-align: center;\n        }\n\n        .info {\n          display: block;\n          max-width: 317px;\n          font-family: 'Special Elite', cursive;\n          font-weight: bold;\n          margin: 0 auto 30px auto;\n          text-align: center;\n        }\n\n        .game-info--button {\n          display: block;\n          margin: 0 0 80px 0;\n        }\n\n        .counter{\n          display: flex;\n          justify-content: center;\n          margin: 0 0 30px 0;\n        }\n\n        .main--jugada-container {\n          display: flex;\n          justify-content: space-between;\n          align-items: flex-end;\n          width: 90%;\n          max-width: 390px;\n          margin: 0 auto;\n      }    \n\n      @media (min-height: 580px) {\n        .main--jugada-container {\n          position: fixed;\n          top: 100%;\n          width: 100%;\n          left: 50%;\n          transform: translate(-50%, -100%);\n        }\n\n        .jugada {\n          cursor: pointer;\n        }\n        `;
+        this.appendChild(style);
+    }
+    constructor(...args){
+        super(...args);
+        this.players = [];
+    }
+}
+customElements.define("game-choice-page", Choice);
+
+},{"../../state":"4KTlf","../home":"e9Za3"}],"jek4p":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "initCounter", ()=>initCounter
+);
+function initCounter() {
+    class Counter extends HTMLElement {
+        constructor(){
+            super();
+            this.shadow = this.attachShadow({
+                mode: "open"
+            });
+        }
+        connectedCallback() {
+            this.render();
+        }
+        render() {
+            const div = document.createElement("div");
+            div.setAttribute("class", "container");
+            div.innerHTML = `\n                <div class="counter-container">\n                    <p class="counter"></p>\n                </div>\n            `;
+            let counter = 3;
+            const intervalo = setInterval(()=>{
+                const num = div.querySelector(".counter");
+                num.innerHTML = `${counter}`;
+                counter--;
+                if (counter < 0) {
+                    clearInterval(intervalo);
+                    displayNoPlayText();
+                    const event = new CustomEvent("timeOut");
+                    this.dispatchEvent(event);
+                }
+            }, 1000);
+            function displayNoPlayText() {
+                setTimeout(()=>{
+                    const counterContainer = div.querySelector(".counter-container");
+                    counterContainer.firstChild.remove();
+                    counterContainer.innerHTML = `\n                            <c-text class="time-out" variant="body">No has elegido a tiempo</c-text>\n                        `;
+                    counterContainer.classList.add("transparent");
+                }, 1000);
+            }
+            const style = document.createElement("style");
+            style.innerHTML = `\n            @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n            \n                .counter-container {\n                    width: 243px;\n                    height: 243px;\n                    border-radius: 50%;\n                    border: 23px solid var(--grey);\n                    border-top-color: var(--black);\n                    display: flex;\n                    justify-content: center;\n                    align-items: center;\n                    animation: rotate 1s 3 .75s ease-out;\n                }\n\n                @keyframes rotate {\n                  0% {\n                    transform: rotate(0);\n                  }\n                  100% {\n                    transform: rotate(365deg);\n                  }\n                }\n\n                .counter {\n                    font-size: 100px;\n                    font-family: 'Special Elite', cursive;\n                    text-align: center;\n                    animation: no-rotate 1s 3 .75s ease-out;\n                }\n\n                @keyframes no-rotate {\n                  0% {\n                    transform: rotate(0);\n                  }\n                  100% {\n                    transform: rotate(-365deg);\n                  }\n                } \n\n                .time-out {\n                    font-family: 'Special Elite', cursive;\n                    text-align: center;\n                }\n\n                .transparent {\n                    border-color: rgba(0, 0, 0, 0.6);\n                }\n            `;
+            div.appendChild(style);
+            this.shadow.appendChild(div);
+        }
+    }
+    customElements.define("c-counter", Counter);
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}]},["gcK6j","4L6tv"], "4L6tv", "parcelRequireca0a")
 
 //# sourceMappingURL=index.39c327d2.js.map

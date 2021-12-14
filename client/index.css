@@ -9,6 +9,7 @@
   --win-secondary: rgba(136, 137, 73, 0.9);
   --black: #000;
   --white: #fff;
+  --grey: rgb(129, 129, 129);
 }
 
 * {
