@@ -5,6 +5,8 @@ const API_BASE_URL = "http://localhost:3000";
 type User = {
   name: string;
 };
+type Jugada = "piedra" | "papel" | "tijera";
+
 const state = {
   data: {
     name: "",
@@ -13,6 +15,7 @@ const state = {
     roomId: "",
     players: [],
     start: "",
+    "current-game": "",
     //   rtdbRoomId: "",
     //   messages: [],
   },
@@ -111,9 +114,12 @@ const state = {
           return res.json();
         })
         .then((res) => {
-          const lastState = this.getState();
-          lastState.pushKey = res.key;
-          state.setState(lastState);
+          console.log(res);
+          // console.log(res.validPlayer);
+          // if (res.validPlayer == true) {
+          // const lastState = this.getState();
+          // lastState.pushKey = res.key;
+          // state.setState(lastState);
 
           const roomId = lastState.roomId;
           const userId = lastState.userId;
@@ -127,10 +133,10 @@ const state = {
               lastState.rtdbRoomId = data.rtdbRoomId;
               this.setState(lastState);
             });
-
           if (cb) {
             cb();
           }
+          // }
         });
     } else {
       console.error("No hay userId");
@@ -187,7 +193,6 @@ const state = {
   },
   bothOnline(cb?) {
     const lastState = this.getState();
-    console.log(lastState);
 
     const chatroomRef = rtdb.ref("/rooms/" + lastState.rtdbRoomId);
     chatroomRef.once("value", (snap) => {
@@ -232,6 +237,39 @@ const state = {
       const start = map(playersFromServer, "start");
 
       if (start[0] == true && start[1] == true) {
+        cb();
+      }
+    });
+  },
+  setMove(move: Jugada, cb?) {
+    const lastState = this.getState();
+    lastState["current-game"] = move;
+    console.log(lastState);
+
+    fetch(API_BASE_URL + "/game/choice", {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        // userId: lastState.userId,
+        player: lastState.player,
+        choice: lastState["current-game"],
+        roomId: lastState.rtdbRoomId,
+      }),
+    }).then(() => {
+      fetch(API_BASE_URL + "rooms/choice", {
+        method: "post",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          player: lastState.player,
+          choice: lastState["current-game"],
+          roomId: lastState.roomId,
+        }),
+      });
+      if (cb) {
         cb();
       }
     });

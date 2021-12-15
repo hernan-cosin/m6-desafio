@@ -3,6 +3,7 @@ import { firestore, rtdb } from "./db";
 import * as cors from "cors";
 import { nanoid } from "nanoid";
 import { state } from "../client/state";
+import map from "lodash/map";
 
 const app = express();
 app.use(express.json());
@@ -41,9 +42,18 @@ app.post("/signin", (req, res) => {
             });
           });
       } else {
-        res.status(400).json({
-          message: "User already exist.",
-        });
+        usersCollection
+          .where("name", "==", name)
+          .get()
+          .then((searchResponse) => {
+            searchResponse.forEach((e) => {
+              res.json({ id: e.ref.path.slice(6), new: false });
+            });
+          });
+        // res.status(400).json({
+        //   message: "User already exist.",
+
+        // });
       }
     });
 });
@@ -108,7 +118,10 @@ app.post("/rooms/access", (req, res) => {
     .then((doc) => {
       if (doc.exists) {
         const roomRef = rtdb.ref("/rooms/" + roomId + "/current-game");
-
+        // roomRef.get().then((snap) => {
+        //   console.log(snap.val());
+        // });
+        // if (snap.val().length == 1) {
         roomRef
           .update({
             1: {
@@ -119,8 +132,67 @@ app.post("/rooms/access", (req, res) => {
             },
           })
           .then(() => {
-            res.json({ key: roomRef.push().key });
+            // res.json({ key: roomRef.push().key });
+            res.status(201).json({ message: "ok" });
           });
+        // }
+        // if (snap.val().length == 2) {
+        //   const names = [];
+        //   for (const u of snap.val()) {
+        //     names.push(u.name);
+        //   }
+        // console.log(names);
+        // if (name == names[0] || name == names[1]) {
+        //   res.json({
+        //     validPlayer: true,
+        //   });
+        // } else {
+        //   res.json({
+        //     validPlayer: false,
+        //   });
+        // }
+        // }
+        // });
+        // roomRef.on("value", (snap) => {
+        //   for (const u of snap.val()) {
+        //     names.push(u.name);
+        //   }
+
+        //   for (const n of names) {
+        //     console.log(n == name);
+        //   }
+        //   if (name !== names[0] || name !== names[1]) {
+        //     res.json({
+        //       message: "el nombre no coincide con un jugador en esta sala",
+        //     });
+        //   } else {
+        //     roomRef
+        //       .update({
+        //         1: {
+        //           name: name,
+        //           userId: userId,
+        //           online: true,
+        //           player: 1,
+        //         },
+        //       })
+        //       .then(() => {
+        //         res.json({ key: roomRef.push().key });
+        //       });
+        //   }
+        // });
+
+        // roomRef
+        //   .update({
+        //     1: {
+        //       name: name,
+        //       userId: userId,
+        //       online: true,
+        //       player: 1,
+        //     },
+        //   })
+        //   .then(() => {
+        //     res.json({ key: roomRef.push().key });
+        //   });
       } else {
         res.status(401).json({
           message: "No existís",
@@ -129,7 +201,7 @@ app.post("/rooms/access", (req, res) => {
     });
 });
 
-// recibes userID and roomID, if user exist returns data from rtbb room ID in firestore db
+// recibes userID and roomID, if user exist returns data from rtdb room ID in firestore db
 app.get("/rooms/:roomId", (req, res) => {
   const { userId } = req.query;
   const { roomId } = req.params;
@@ -167,6 +239,41 @@ app.post("/rooms/start", (req, res) => {
     })
     .then(() => {
       res.json({ update: true });
+    });
+});
+
+app.post("/game/choice", (req, res) => {
+  const { roomId } = req.body;
+  const { player } = req.body;
+  const { choice } = req.body;
+
+  const roomRef = rtdb.ref("/rooms/" + roomId + "/current-game" + "/" + player);
+  roomRef
+    .update({
+      choice: choice,
+    })
+    .then(() => {
+      res.json({ update: true });
+    });
+});
+
+app.post("/rooms/choice", (req, res) => {
+  const { roomId } = req.body;
+  const { choice } = req.body;
+  const { player } = req.body;
+  roomsCollection
+    .doc(roomId.toString())
+    .update({
+      history: [
+        {
+          [player]: choice,
+        },
+      ],
+    })
+    .then(() => {
+      res.json({
+        id: roomId.toString(),
+      });
     });
 });
 

@@ -7,11 +7,53 @@ class Choice extends HTMLElement {
   players: { name: string }[] = [];
   connectedCallback() {
     this.render();
+
+    const piedraEl = this.querySelector(".piedra");
+    const papelEl = this.querySelector(".papel");
+    const tijeraEl = this.querySelector(".tijera");
+
+    const jugadas = [piedraEl, papelEl, tijeraEl];
+    jugadas.map((e: any) => {
+      e.addEventListener("click", (e) => {
+        // console.log(e.target);
+
+        e.target.shadow.firstChild.classList.add("select-move");
+
+        gameAnimation();
+
+        const move = e.target.className.split(" ")[1];
+        console.log(move);
+
+        state.setMove(move);
+
+        // state.setComputerMove();
+        // const computerMove = state.getState().currentGame.computerPlay;
+
+        // renderComputerPlay(computerMove, computerJugadaContainer);
+
+        // setTimeout(() => {
+        //   handleWhoWins(move, computerMove);
+        // }, 3000);
+
+        // state.pushToHistory({ computerPlay: computerMove, myPlay: move });
+        // state.setState(state.getState());
+      });
+    });
+
+    function gameAnimation() {
+      const jugadasShadow = jugadas.map((j: any) => {
+        return j.shadow.firstChild;
+      });
+
+      const filtrado = jugadasShadow.filter(
+        (j) => !j.className.includes("select-move")
+      );
+      filtrado.map((j) => {
+        j.classList.add("transparent");
+      });
+    }
   }
   render() {
-    // state.readyToPlay(() => {
-    //   Router.go("/game");
-    // });
     const lastState = state.getState();
 
     this.innerHTML = `

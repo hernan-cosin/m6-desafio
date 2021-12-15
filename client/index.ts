@@ -12,6 +12,7 @@ import "./pages/room";
 import "./pages/press-play";
 import "./pages/waiting-room";
 import "./pages/choice";
+import "./pages/no-room";
 import "./router";
 
 function main() {
