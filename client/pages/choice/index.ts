@@ -7,7 +7,11 @@ class Choice extends HTMLElement {
   players: { name: string }[] = [];
   connectedCallback() {
     this.render();
-
+    state.subscribe(() => {
+      state.bothSetMove(() => {
+        state.setHistory();
+      });
+    });
     const piedraEl = this.querySelector(".piedra");
     const papelEl = this.querySelector(".papel");
     const tijeraEl = this.querySelector(".tijera");
@@ -22,7 +26,7 @@ class Choice extends HTMLElement {
         gameAnimation();
 
         const move = e.target.className.split(" ")[1];
-        console.log(move);
+        // console.log(move);
 
         state.setMove(move);
 

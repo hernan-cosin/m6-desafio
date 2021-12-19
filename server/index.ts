@@ -4,6 +4,7 @@ import * as cors from "cors";
 import { nanoid } from "nanoid";
 import { state } from "../client/state";
 import map from "lodash/map";
+import firebase from "firebase";
 
 const app = express();
 app.use(express.json());
@@ -90,6 +91,7 @@ app.post("/rooms", (req, res) => {
             roomsCollection
               .doc(roomId.toString())
               .set({
+                history: [],
                 rtdbRoomId: roomLongId,
               })
               .then(() => {
@@ -217,6 +219,8 @@ app.get("/rooms/:roomId", (req, res) => {
           .get()
           .then((snap) => {
             const data = snap.data();
+            // console.log(data);
+
             res.json(data);
           });
       } else {
@@ -227,6 +231,7 @@ app.get("/rooms/:roomId", (req, res) => {
     });
 });
 
+// set the start item in RTDB to true
 app.post("/rooms/start", (req, res) => {
   const { roomId } = req.body;
   const { player } = req.body;
@@ -242,37 +247,163 @@ app.post("/rooms/start", (req, res) => {
     });
 });
 
+// set the selected choice in the RTDB
 app.post("/game/choice", (req, res) => {
   const { roomId } = req.body;
   const { player } = req.body;
   const { choice } = req.body;
+  // const { shortId } = req.body;
 
   const roomRef = rtdb.ref("/rooms/" + roomId + "/current-game" + "/" + player);
   roomRef
     .update({
       choice: choice,
     })
+    // .then(() => {
+    // const roomRefCurrentGame = rtdb.ref("/rooms/" + roomId + "/current-game");
+    // roomRefCurrentGame.get().then((data) => {
+    //   const info = data.val();
+    //   // console.log(info);
+    //   const mapeado = info.map((p) => {
+    //     return { [p.player]: p.choice };
+    //   });
+    //   // console.log(mapeado);
+    //   roomsCollection
+    //     .doc(shortId.toString())
+    //     .set({ mapeado }, { merge: true });
+    // });
+    // roomsCollection
+    //   .doc(shortId.toString())
+    //   .update({
+    //     history: [
+    //       {
+    //         [player]: choice,
+    //       },
+    //     ],
+    // })
     .then(() => {
-      res.json({ update: true });
+      res.json({
+        message: "choice updated in rtdb",
+      });
     });
 });
+// });
 
 app.post("/rooms/choice", (req, res) => {
   const { roomId } = req.body;
-  const { choice } = req.body;
-  const { player } = req.body;
+  let { history } = req.body;
+  // const { player } = req.body;
+  // console.log(history);
   roomsCollection
     .doc(roomId.toString())
-    .update({
-      history: [
-        {
-          [player]: choice,
-        },
-      ],
+    .get()
+    .then((resp) => {
+      // const historyFromFirestore = resp.data().history;
+
+      // historyFromFirestore.push(history[0]);
+      // console.log(historyFromFirestore);
+
+      roomsCollection
+        .doc(roomId.toString())
+        .get()
+        .then((snap) => {
+          const data = snap.data();
+          // console.log("data history", data.history);
+          // console.log("history from body", history);
+          history.push(...data.history);
+          // console.log("history modified", history);
+
+          // data.push(history[0]);
+          roomsCollection
+            .doc(roomId.toString())
+            .set({ history }, { merge: true });
+        });
+      //   .set({ historyFromFirestore }, { merge: true });
+      // const history = resp.data().history;
+
+      // history.push(history[0]);
+
+      // roomsCollection.doc(roomId.toString()).set({ history }, { merge: true });
+      // }history
     })
+
+    // roomsCollection
+    //   .doc(roomId.toString())
+    //   .set({ history }, { merge: true })
+    // .get()
+    // .then((resp) => {
+    // console.log(resp.data().history == undefined);
+    // console.log(resp.data().history);
+    // console.log(resp.data().history.length);
+    // console.log(resp.data().history[0]);
+    // console.log(resp.data().history[resp.data().history.length - 1]);
+    // console.log(resp.data().history[resp.data().history.length - 1][0]);
+    // console.log(resp.data().history[resp.data().history.length - 1][1]);
+    // console.log(resp.data().history[resp.data().history.length]);
+    // console.log(resp.data().history[resp.data().length]);
+
+    // console.log(resp.data().history[resp.data().history.length - 1][0]);
+    // console.log(resp.data().history[resp.data().history.length - 1][1]);
+    // console.log(resp.data().history[resp.data().history.length - 1][2]);
+    // if (resp.data().history == undefined) {
+    // roomsCollection.doc(roomId.toString()).update({
+    //   history: [
+    //     {
+    //       [player]: choice,
+    //     },
+    //   ],
+    // });
+    // }
+    // if (resp.data().history[resp.data().history.length - 1][1] == undefined) {
+    //   roomsCollection.doc(roomId.toString()).set({
+    //     history: [
+    //       {
+    //         [player]: choice,
+    //       },
+    //     ],
+    // });
+    // resp.data().history[resp.data().history.length - 1][0].update({
+    //   [player]: choice,
+    // });
+    // resp.data().history[].update({
+    //   [player]: choice,
+    // });
+    // }
+    // if (resp.data().history[resp.data().history.length - 1][1] == undefined) {
+    //   resp.data().history[resp.data().history.length - 1].update({
+    //     [player]: choice,
+    //   });
+    // }
+    // const history = resp.data().history;
+    // console.log("history", history);
+    // console.log("history length", history.length);
+    // console.log("history[0]", history[0]);
+
+    // history[history.length - 1] = {
+    //   ...history[history.length - 1],
+    //   [player]: choice,
+    // };
+    // console.log(history);
+    // roomsCollection.doc(roomId.toString()).update({ history });
+    // if (resp.data().history.length > 0) {
+    //   const lastHistory = resp.data().history;
+    //   lastHistory[lastHistory.length - 1].push(player + ":" + choice);
+    //   roomsCollection.doc(roomId.toString()).update({ lastHistory });
+    // }
+    // })
+    // .then(() => {
+    // .update({
+    //   history: [
+    //     {
+    //       [player]: choice,
+    //     },
+    //   ],
+    // })
+    // })
     .then(() => {
       res.json({
-        id: roomId.toString(),
+        message: "choice updated in firestore",
+        // id: roomId.toString(),
       });
     });
 });

@@ -159,9 +159,8 @@ const state = {
         lastState.rtdbRoomId = data.rtdbRoomId;
         this.setState(lastState);
 
+        // console.log(state.getState());
         if (cb) {
-          // console.log(state.getState());
-
           cb();
         }
       });
@@ -242,6 +241,9 @@ const state = {
     });
   },
   setMove(move: Jugada, cb?) {
+    // sets the player choice in the RTDB
+    // then sets the state to triger the subscribe in the page and listen if both set their move
+    // when true it sets the history in firestor
     const lastState = this.getState();
     lastState["current-game"] = move;
     console.log(lastState);
@@ -256,21 +258,73 @@ const state = {
         player: lastState.player,
         choice: lastState["current-game"],
         roomId: lastState.rtdbRoomId,
+        // shortId: lastState.roomId,
       }),
     }).then(() => {
-      fetch(API_BASE_URL + "rooms/choice", {
-        method: "post",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          player: lastState.player,
-          choice: lastState["current-game"],
-          roomId: lastState.roomId,
-        }),
-      });
+      state.setState(lastState);
+
       if (cb) {
         cb();
+      }
+    });
+  },
+  setHistory() {
+    // sets the history in firestore
+    const lastState = this.getState();
+    console.log(lastState.game);
+
+    fetch(API_BASE_URL + "/rooms/choice", {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        // userId: lastState.userId,
+        player: lastState.player,
+        history: lastState.game,
+        roomId: lastState.roomId,
+        // shortId: lastState.roomId,
+      }),
+    });
+  },
+  bothSetMove(cb?) {
+    // checks if both players have set their move in the RTDB
+    // if true it sets both moves in the state
+    // then ejecute callback
+    const lastState = this.getState();
+
+    const chatroomRef = rtdb.ref("/rooms/" + lastState.rtdbRoomId);
+    chatroomRef.on("value", (snap) => {
+      const playersFromServer = snap.val()["current-game"];
+
+      // const choice = map(playersFromServer, "choice");
+      const twoPlayersChoices = map(playersFromServer, (p) => {
+        return { [p.player]: p.choice };
+        // return p.choice;
+      });
+      console.log("twoPlayersChoices[0]", twoPlayersChoices[0]);
+      console.log("twoPlayersChoices[1]", twoPlayersChoices[1]);
+      console.log("twoPlayersChoices[0][0]", twoPlayersChoices[0][0]);
+      console.log("twoPlayersChoices[1][1]", twoPlayersChoices[1][1]);
+      console.log(
+        twoPlayersChoices[0][0] !== undefined &&
+          twoPlayersChoices[1][1] !== undefined
+      );
+
+      if (
+        twoPlayersChoices[0][0] !== undefined &&
+        twoPlayersChoices[1][1] !== undefined
+      ) {
+        lastState.game = [
+          {
+            ...twoPlayersChoices[0],
+            1: twoPlayersChoices[1][1],
+          },
+        ];
+
+        if (cb) {
+          cb();
+        }
       }
     });
   },
