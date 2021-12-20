@@ -271,7 +271,6 @@ const state = {
   setHistory() {
     // sets the history in firestore
     const lastState = this.getState();
-    console.log(lastState.game);
 
     fetch(API_BASE_URL + "/rooms/choice", {
       method: "post",
@@ -302,14 +301,6 @@ const state = {
         return { [p.player]: p.choice };
         // return p.choice;
       });
-      console.log("twoPlayersChoices[0]", twoPlayersChoices[0]);
-      console.log("twoPlayersChoices[1]", twoPlayersChoices[1]);
-      console.log("twoPlayersChoices[0][0]", twoPlayersChoices[0][0]);
-      console.log("twoPlayersChoices[1][1]", twoPlayersChoices[1][1]);
-      console.log(
-        twoPlayersChoices[0][0] !== undefined &&
-          twoPlayersChoices[1][1] !== undefined
-      );
 
       if (
         twoPlayersChoices[0][0] !== undefined &&
