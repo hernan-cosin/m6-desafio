@@ -6,10 +6,36 @@ class Choice extends HTMLElement {
   shadow: ShadowRoot;
   players: { name: string }[] = [];
   connectedCallback() {
+    const lastState = state.getState();
+    // lastState.game = [];
+
     this.render();
     state.subscribe(() => {
       state.bothSetMove(() => {
-        state.setHistory();
+        state.setHistory(() => {
+          const lastState = state.getState();
+          const rtdbRoomId = lastState.rtdbRoomId;
+          const roomId = lastState.roomId;
+          // console.log(state.getState());
+          // const resultWhoWins = state.whoWins(state.getState().game[0]);
+
+          // console.log(state.getState().player, resultWhoWins);
+          const player = state.getState().player;
+
+          // console.log(state.getState().game);
+
+          state.getHistoryFromFirestore(rtdbRoomId, roomId);
+          console.log(state.getState().historyFromFirestore);
+          console.log(state.getState());
+
+          // if (resultWhoWins == -1) {
+          //   Router.go("/press-play");
+          // } else if (player == resultWhoWins) {
+          //   Router.go("/results/win");
+          // } else {
+          //   Router.go("/results/loose");
+          // }
+        });
       });
     });
     const piedraEl = this.querySelector(".piedra");

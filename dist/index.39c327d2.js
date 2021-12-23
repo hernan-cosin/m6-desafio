@@ -461,6 +461,8 @@ var _jugada = require("./components/jugada");
 var _text = require("./components/text");
 var _counter = require("./components/counter");
 var _formRoom = require("./components/form-room");
+var _score = require("./components/score");
+var _star = require("./components/star");
 var _home = require("./pages/home");
 var _name = require("./pages/name");
 var _code = require("./pages/code");
@@ -469,6 +471,8 @@ var _pressPlay = require("./pages/press-play");
 var _waitingRoom = require("./pages/waiting-room");
 var _choice = require("./pages/choice");
 var _noRoom = require("./pages/no-room");
+var _win = require("./pages/results/win");
+var _loose = require("./pages/results/loose");
 var _router = require("./router");
 function main() {
     _button.initButtom();
@@ -477,10 +481,12 @@ function main() {
     _formName.initFormName();
     _formRoom.initFormRoom();
     _counter.initCounter();
+    _score.initScore();
+    _star.initStar();
 }
 main();
 
-},{"./components/button":"2LIbR","./components/jugada":"xZJpl","./components/text":"7QAPx","./pages/home":"e9Za3","./router":"4zXxa","./pages/name":"8g1Nu","./components/form-name":"ghREk","./pages/code":"cJ8G0","./components/form-room":"87oyc","./pages/room":"bZinD","./pages/press-play":"gNShy","./components/counter":"jek4p","./pages/waiting-room":"lmp3n","./pages/choice":"bQKzh","./pages/no-room":"lRKzc"}],"2LIbR":[function(require,module,exports) {
+},{"./components/button":"2LIbR","./components/jugada":"xZJpl","./components/text":"7QAPx","./pages/home":"e9Za3","./router":"4zXxa","./pages/name":"8g1Nu","./components/form-name":"ghREk","./pages/code":"cJ8G0","./components/form-room":"87oyc","./pages/room":"bZinD","./pages/press-play":"gNShy","./components/counter":"jek4p","./pages/waiting-room":"lmp3n","./pages/choice":"bQKzh","./pages/no-room":"lRKzc","./components/score":"l7w21","./components/star":"gOzEQ","./pages/results/win":"5jPlg","./pages/results/loose":"5sbdE"}],"2LIbR":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "initButtom", ()=>initButtom
@@ -3106,6 +3112,14 @@ router.setRoutes([
         component: "game-choice-page"
     },
     {
+        path: "/results/win",
+        component: "result-win"
+    },
+    {
+        path: "/results/loose",
+        component: "result-loose"
+    },
+    {
         path: "/no-room",
         component: "no-room"
     }, 
@@ -3351,7 +3365,6 @@ const state = {
         // when true it sets the history in firestor
         const lastState = this.getState();
         lastState["current-game"] = move;
-        console.log(lastState);
         fetch(API_BASE_URL + "/game/choice", {
             method: "post",
             headers: {
@@ -3368,7 +3381,7 @@ const state = {
             if (cb) cb();
         });
     },
-    setHistory () {
+    setHistory (cb) {
         // sets the history in firestore
         const lastState = this.getState();
         fetch(API_BASE_URL + "/rooms/choice", {
@@ -3382,6 +3395,8 @@ const state = {
                 history: lastState.game,
                 roomId: lastState.roomId
             })
+        }).then(()=>{
+            if (cb) cb();
         });
     },
     bothSetMove (cb) {
@@ -3397,7 +3412,6 @@ const state = {
                 return {
                     [p.player]: p.choice
                 };
-            // return p.choice;
             });
             if (twoPlayersChoices[0][0] !== undefined && twoPlayersChoices[1][1] !== undefined) {
                 lastState.game = [
@@ -3408,6 +3422,41 @@ const state = {
                 ];
                 if (cb) cb();
             }
+        });
+    },
+    whoWins (game, cb) {
+        // returns -1 if draw
+        // returns 1 if player one wins
+        // returns 0 if player zero wins
+        if (game[0] == game[1]) return -1;
+        if (game[0] == "piedra" && game[1] == "papel") return 1;
+        if (game[0] == "piedra" && game[1] == "tijera") return 0;
+        if (game[0] == "papel" && game[1] == "piedra") return 0;
+        if (game[0] == "papel" && game[1] == "tijera") return 1;
+        if (game[0] == "tijera" && game[1] == "piedra") return 1;
+        if (game[0] == "tijera" && game[1] == "papel") return 0;
+    },
+    getHistoryFromFirestore (rtdbroomid, roomid) {
+        const lastState = this.getState();
+        function whoWins(g) {
+            return state.whoWins(g);
+        }
+        fetch(API_BASE_URL + "/rooms/history", {
+            method: "post",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                rtdbRoomId: lastState.rtdbRoomId,
+                roomId: lastState.roomId
+            })
+        }).then((data)=>{
+            return data.json();
+        }).then((history)=>{
+            console.log(history);
+            const mapeado = _mapDefault.default(history, whoWins);
+            lastState.historyFromFirestore = mapeado;
+            console.log(mapeado);
         });
     }
 };
@@ -64818,10 +64867,31 @@ var _state = require("../../state");
 var _home = require("../home");
 class Choice extends HTMLElement {
     connectedCallback() {
+        const lastState = _state.state.getState();
+        // lastState.game = [];
         this.render();
         _state.state.subscribe(()=>{
             _state.state.bothSetMove(()=>{
-                _state.state.setHistory();
+                _state.state.setHistory(()=>{
+                    const lastState1 = _state.state.getState();
+                    const rtdbRoomId = lastState1.rtdbRoomId;
+                    const roomId = lastState1.roomId;
+                    // console.log(state.getState());
+                    // const resultWhoWins = state.whoWins(state.getState().game[0]);
+                    // console.log(state.getState().player, resultWhoWins);
+                    const player = _state.state.getState().player;
+                    // console.log(state.getState().game);
+                    _state.state.getHistoryFromFirestore(rtdbRoomId, roomId);
+                    console.log(_state.state.getState().historyFromFirestore);
+                    console.log(_state.state.getState());
+                // if (resultWhoWins == -1) {
+                //   Router.go("/press-play");
+                // } else if (player == resultWhoWins) {
+                //   Router.go("/results/win");
+                // } else {
+                //   Router.go("/results/loose");
+                // }
+                });
             });
         });
         const piedraEl = this.querySelector(".piedra");
@@ -64933,6 +65003,146 @@ class NoRoom extends HTMLElement {
 }
 customElements.define("no-room", NoRoom);
 
-},{"../home":"e9Za3"}]},["gcK6j","4L6tv"], "4L6tv", "parcelRequireca0a")
+},{"../home":"e9Za3"}],"l7w21":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "initScore", ()=>initScore
+);
+var _state = require("../../state");
+function initScore() {
+    class Score extends HTMLElement {
+        constructor(){
+            super();
+            this.shadow = this.attachShadow({
+                mode: "open"
+            });
+        }
+        connectedCallback() {
+            this.render();
+        }
+        render() {
+            const lastState = _state.state.getState();
+            const div = document.createElement("div");
+            div.setAttribute("class", "score-container");
+            //   const history = state.getState().history;
+            //   let computerWins = [];
+            //   let playerWins = [];
+            //   history.map((h) => {
+            //     const winner = state.whoWins(h.myPlay, h.computerPlay);
+            //     if (winner == 0) {
+            //       computerWins.push(winner);
+            //     }
+            //     if (winner == 1) {
+            //       playerWins.push(winner);
+            //     }
+            //   });
+            //   const myScore = playerWins.length;
+            //   const machineScore = computerWins.length;
+            const player0 = lastState.players ? lastState.players[0] : "";
+            const player1 = lastState.players ? lastState.players[1] : "";
+            div.innerHTML = `\n                <c-text class="score-title" variant="subtitle">Score</c-text>\n                <c-text class="score"> ${player0}:</c-text>\n                <c-text class="score"> ${player1}: </c-text>\n            `;
+            const style = document.createElement("style");
+            style.innerHTML = `\n      @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n                .score-container {\n                    width: 259px;\n                    height: 217px;\n                    border: 10px solid var(--black);\n                    border-radius: 10px;\n                    margin-bottom: 20px;\n                    background-color: var(--white);\n                }\n\n                .score-title {\n                    font-family: 'Odibee Sans', cursive;\n                    text-align: center;\n                }\n\n                .score {\n                  font-family: 'Odibee Sans', cursive;\n                  text-align: right;\n                  display: block;\n                  padding: 0 10px 0 0;\n                }\n            `;
+            this.shadow.appendChild(div);
+            this.shadow.appendChild(style);
+        }
+    }
+    customElements.define("c-score", Score);
+}
+
+},{"../../state":"4KTlf","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"gOzEQ":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "initStar", ()=>initStar
+);
+const starW = require("url:../../media/starW.svg");
+const starL = require("url:../../media/starL.svg");
+function initStar() {
+    class Star extends HTMLElement {
+        constructor(){
+            super();
+            this.shadow = this.attachShadow({
+                mode: "open"
+            });
+        }
+        connectedCallback() {
+            this.render();
+        }
+        render() {
+            const div = document.createElement("div");
+            const att = this.getAttribute("variant");
+            if (att == "win") div.innerHTML = `\n                    <img src="${starW}" alt="estrella verde"/>\n                `;
+            if (att == "loose") div.innerHTML = `\n                    <img src="${starL}" alt="estrella roja"/>\n                `;
+            this.shadow.appendChild(div);
+        }
+    }
+    customElements.define("c-star", Star);
+}
+
+},{"url:../../media/starW.svg":"dBXaD","url:../../media/starL.svg":"jLmZ9","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"dBXaD":[function(require,module,exports) {
+module.exports = require('./helpers/bundle-url').getBundleURL('8st4b') + "starW.032f40d6.svg";
+
+},{"./helpers/bundle-url":"8YnfL"}],"jLmZ9":[function(require,module,exports) {
+module.exports = require('./helpers/bundle-url').getBundleURL('8st4b') + "starL.d4247035.svg";
+
+},{"./helpers/bundle-url":"8YnfL"}],"5jPlg":[function(require,module,exports) {
+var _state = require("../../../state");
+var _router = require("@vaadin/router");
+class resultWin extends HTMLElement {
+    connectedCallback() {
+        this.render();
+        const button = document.querySelector(".button");
+        button.addEventListener("click", (e)=>{
+            e.preventDefault();
+            _router.Router.go("/press-play");
+        // params.goTo("/dwf-m5-desafio/instructions");
+        });
+        const scoreContainer = document.querySelector(".score-container");
+        _state.state.subscribe(()=>{
+            const scoreBoard = document.createElement("c-score");
+            scoreBoard.setAttribute("class", "score-board");
+            scoreContainer.firstChild ? scoreContainer.firstChild.remove() : scoreContainer.appendChild(scoreBoard);
+        });
+    // state.setState(state.getState());
+    }
+    render() {
+        this.innerHTML = `\n            <div class="container">\n                <div class="content">\n                    <c-star variant="win"></c-star>\n                    <div class="score-container"></div>\n                    <c-button class="button">Volver a Jugar</c-button>\n                </div>\n            <div>\n            `;
+        const style = document.createElement("style");
+        style.innerHTML = `\n                .container {\n                  padding: 20px;\n                  background-color: var(--win-secondary);\n                  overflow: auto;\n                }\n        \n                .content {\n                    animation: fadeIn 2s;\n                    animation-fill-mode: both;\n                    opacity: 0;\n                    max-width: 769px;\n                    height: 100vh;\n                    margin: 0 auto;\n                    display: flex;\n                    flex-direction: column;\n                    align-items: center;\n                    justify-content: space-between;\n                    padding: 30px 0;\n                }\n      \n                @keyframes fadeIn {\n                    100%{\n                        opacity: 1;\n                    }\n                }\n            `;
+        this.appendChild(style);
+    }
+}
+customElements.define("result-win", resultWin);
+
+},{"../../../state":"4KTlf","@vaadin/router":"kFgop"}],"5sbdE":[function(require,module,exports) {
+var _state = require("../../../state");
+var _router = require("@vaadin/router");
+class resultLoose extends HTMLElement {
+    connectedCallback() {
+        this.render();
+        const button = document.querySelector(".button");
+        button.addEventListener("click", (e)=>{
+            e.preventDefault();
+            _router.Router.go("/press-play");
+        // params.goTo("/dwf-m5-desafio/instructions");
+        });
+        const scoreContainer = document.querySelector(".score-container");
+        _state.state.subscribe(()=>{
+            const scoreBoard = document.createElement("c-score");
+            scoreBoard.setAttribute("class", "score-board");
+            scoreContainer.firstChild ? scoreContainer.firstChild.remove() : scoreContainer.appendChild(scoreBoard);
+        });
+    // state.setState(state.getState());
+    }
+    render() {
+        this.innerHTML = `\n            <div class="container">\n                <div class="content">\n                    <c-star variant="loose"></c-star>\n                    <div class="score-container"></div>\n                    <c-button class="button">Volver a Jugar</c-button>\n                </div>\n            <div>\n            `;
+        const style = document.createElement("style");
+        style.innerHTML = `\n            .container {\n                padding: 20px;\n                background-color: var(--loose-secondary);\n                overflow: auto;\n            }\n\n            .content {\n                animation: fadeIn 2s;\n                animation-fill-mode: both;\n                opacity: 0;\n                max-width: 769px;\n                height: 100vh;\n                margin: 0 auto;\n                display: flex;\n                flex-direction: column;\n                align-items: center;\n                justify-content: space-between;\n                padding: 30px 0;\n            }\n\n            @keyframes fadeIn{\n                100% {\n                    opacity: 1;\n                    animation-fill-mode: both;\n                }\n            }\n\n            .score-board {\n                display: block;\n            }       \n            `;
+        this.appendChild(style);
+    }
+}
+customElements.define("result-loose", resultLoose);
+
+},{"../../../state":"4KTlf","@vaadin/router":"kFgop"}]},["gcK6j","4L6tv"], "4L6tv", "parcelRequireca0a")
 
 //# sourceMappingURL=index.39c327d2.js.map

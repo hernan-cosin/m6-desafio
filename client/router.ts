@@ -10,5 +10,7 @@ router.setRoutes([
   { path: "/press-play", component: "press-play-page" },
   { path: "/waiting-room", component: "waiting-room-page" },
   { path: "/choice", component: "game-choice-page" },
+  { path: "/results/win", component: "result-win" },
+  { path: "/results/loose", component: "result-loose" },
   { path: "/no-room", component: "no-room" },
 ]);

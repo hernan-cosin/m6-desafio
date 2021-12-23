@@ -1,12 +1,15 @@
 import { rtdb } from "./rtdb";
 import map from "lodash/map";
-// const API_BASE_URL = "http://localhost:3000";
-const API_BASE_URL = "";
+const API_BASE_URL = "http://localhost:3000";
+// const API_BASE_URL = "";
 type User = {
   name: string;
 };
 type Jugada = "piedra" | "papel" | "tijera";
-
+type Game = {
+  0: Jugada;
+  1: Jugada;
+};
 const state = {
   data: {
     name: "",
@@ -246,7 +249,6 @@ const state = {
     // when true it sets the history in firestor
     const lastState = this.getState();
     lastState["current-game"] = move;
-    console.log(lastState);
 
     fetch(API_BASE_URL + "/game/choice", {
       method: "post",
@@ -268,7 +270,7 @@ const state = {
       }
     });
   },
-  setHistory() {
+  setHistory(cb?) {
     // sets the history in firestore
     const lastState = this.getState();
 
@@ -284,6 +286,10 @@ const state = {
         roomId: lastState.roomId,
         // shortId: lastState.roomId,
       }),
+    }).then(() => {
+      if (cb) {
+        cb();
+      }
     });
   },
   bothSetMove(cb?) {
@@ -299,7 +305,6 @@ const state = {
       // const choice = map(playersFromServer, "choice");
       const twoPlayersChoices = map(playersFromServer, (p) => {
         return { [p.player]: p.choice };
-        // return p.choice;
       });
 
       if (
@@ -318,6 +323,59 @@ const state = {
         }
       }
     });
+  },
+  whoWins(game: Game, cb?) {
+    // returns -1 if draw
+    // returns 1 if player one wins
+    // returns 0 if player zero wins
+    if (game[0] == game[1]) {
+      return -1;
+    }
+    if (game[0] == "piedra" && game[1] == "papel") {
+      return 1;
+    }
+    if (game[0] == "piedra" && game[1] == "tijera") {
+      return 0;
+    }
+    if (game[0] == "papel" && game[1] == "piedra") {
+      return 0;
+    }
+    if (game[0] == "papel" && game[1] == "tijera") {
+      return 1;
+    }
+    if (game[0] == "tijera" && game[1] == "piedra") {
+      return 1;
+    }
+    if (game[0] == "tijera" && game[1] == "papel") {
+      return 0;
+    }
+  },
+  getHistoryFromFirestore(rtdbroomid: string, roomid: string) {
+    const lastState = this.getState();
+    function whoWins(g) {
+      return state.whoWins(g);
+    }
+
+    fetch(API_BASE_URL + "/rooms/history", {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        rtdbRoomId: lastState.rtdbRoomId,
+        roomId: lastState.roomId,
+      }),
+    })
+      .then((data) => {
+        return data.json();
+      })
+      .then((history) => {
+        console.log(history);
+
+        const mapeado = map(history, whoWins);
+        lastState.historyFromFirestore = mapeado;
+        console.log(mapeado);
+      });
   },
 };
 

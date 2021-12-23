@@ -1,6 +1,5 @@
 // const bg = require("url:../../media/bg.svg");
 import { Router } from "@vaadin/router";
-import { initFormRoom } from "../../components/form-room";
 import { state } from "../../state";
 import { bg } from "../home";
 

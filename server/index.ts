@@ -289,6 +289,7 @@ app.post("/game/choice", (req, res) => {
 });
 // });
 
+// update the history in the firestore
 app.post("/rooms/choice", (req, res) => {
   const { roomId } = req.body;
   let { history } = req.body;
@@ -405,6 +406,23 @@ app.post("/rooms/choice", (req, res) => {
         message: "choice updated in firestore",
         // id: roomId.toString(),
       });
+    });
+});
+
+// recives rtdbroomid from the state and the roomid corresponding to firestore
+// and returns the history of that room
+app.post("/rooms/history", (req, res) => {
+  const { rtdbRoomId } = req.body;
+  const { roomId } = req.body;
+
+  roomsCollection
+    .doc(roomId)
+    .get()
+    .then((snap) => {
+      const data = snap.data();
+      if (data.rtdbRoomId == rtdbRoomId) {
+        res.send(data.history);
+      }
     });
 });
 
