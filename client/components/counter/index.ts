@@ -26,7 +26,7 @@ export function initCounter() {
         if (counter < 0) {
           clearInterval(intervalo);
           displayNoPlayText();
-          const event = new CustomEvent("timeOut");
+          const event = new CustomEvent("timeOut", { bubbles: true });
           this.dispatchEvent(event);
         }
       }, 1000);

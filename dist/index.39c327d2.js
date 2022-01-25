@@ -64886,7 +64886,9 @@ function initCounter() {
                 if (counter < 0) {
                     clearInterval(intervalo);
                     displayNoPlayText();
-                    const event = new CustomEvent("timeOut");
+                    const event = new CustomEvent("timeOut", {
+                        bubbles: true
+                    });
                     this.dispatchEvent(event);
                 }
             }, 1000);
@@ -64974,20 +64976,18 @@ class Choice extends HTMLElement {
     }
     render() {
         _state.state.bothSetMove(()=>{
-            // const lastState = state.getState();
-            // if (lastState.player == 0) {
             _state.state.setHistory(()=>{
                 _router.Router.go("/results/both");
             });
-        // } else {
-        //   Router.go("/results/both");
-        // }
         });
-        const lastState = _state.state.getState();
-        this.innerHTML = `\n        <section class="main">\n            <!-- <header class="main--header">\n                <div class="header--names-container">\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[0] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[1] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  </div>\n                <div class="header--room-container">\n                  <c-text variant="custom" custom="24" class="room-text">Sala</c-text>\n                  <c-text variant="custom" custom="24" class="roomId">${lastState.roomId}</c-text>\n              </div>\n            </header>\n            <section class="game-info">\n                <c-text variant="custom" custom="35" class="info ">Esperando a que ${lastState.players[0] == lastState.name ? lastState.players[1] : lastState.players[0]} presione jugar</c-text>\n            </section> -->\n            \n            <c-counter class="counter"></c-counter>\n            <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedraLarge"></c-play>\n              <c-play class="jugada papel" play="papelLarge"></c-play>\n              <c-play class="jugada tijera" play="tijeraLarge"></c-play>\n            </div>\n        </section>\n\n        `;
+        this.addEventListener("timeOut", this.outOfTime);
+        this.innerHTML = `\n        <section class="main">            \n            <c-counter class="counter"></c-counter>\n            <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedraLarge"></c-play>\n              <c-play class="jugada papel" play="papelLarge"></c-play>\n              <c-play class="jugada tijera" play="tijeraLarge"></c-play>\n            </div>\n        </section>\n\n        `;
         const style = document.createElement("style");
         style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 40px 0 0 0;\n        }\n\n       /* @media (min-width: 769px) {\n          .main{\n            padding: 60px 0 0 0;\n          }\n        } */\n\n        .main--header {\n          display: flex;\n          justify-content: space-between;\n          font-family: 'Special Elite';\n          column-gap: 30px;\n          max-width: 960px;\n          margin: 0 auto 50px auto ;\n          padding: 0 30px;\n        }\n\n        @media (min-width: 769px) {\n          .main--header {\n            margin: 0 auto 60px auto;\n          }\n        }\n          \n        .header--name {\n          display: block;\n          font-family: 'Special Elite', cursive;\n        }\n\n        .room-text {\n          font-weight: bold;\n        }\n        \n        .roomId {\n          text-align: right;\n          font-weight: bold;\n        }\n\n        .game-info {\n          max-width: 960px;\n          margin: 0 auto;\n          text-align: center;\n        }\n\n        .info {\n          display: block;\n          max-width: 317px;\n          font-family: 'Special Elite', cursive;\n          font-weight: bold;\n          margin: 0 auto 30px auto;\n          text-align: center;\n        }\n\n        .game-info--button {\n          display: block;\n          margin: 0 0 80px 0;\n        }\n\n        .counter{\n          display: flex;\n          justify-content: center;\n          margin: 0 0 30px 0;\n        }\n\n        .main--jugada-container {\n          display: flex;\n          justify-content: space-between;\n          align-items: flex-end;\n          width: 90%;\n          max-width: 390px;\n          margin: 0 auto;\n      }    \n\n      @media (min-height: 580px) {\n        .main--jugada-container {\n          position: fixed;\n          top: 100%;\n          width: 100%;\n          left: 50%;\n          transform: translate(-50%, -100%);\n        }\n\n        .jugada {\n          cursor: pointer;\n        }\n        `;
         this.appendChild(style);
+    }
+    outOfTime() {
+        _router.Router.go("/press-play");
     }
     constructor(...args){
         super(...args);

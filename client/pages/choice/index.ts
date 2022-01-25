@@ -43,43 +43,15 @@ class Choice extends HTMLElement {
   }
   render() {
     state.bothSetMove(() => {
-      // const lastState = state.getState();
-      // if (lastState.player == 0) {
       state.setHistory(() => {
         Router.go("/results/both");
       });
-      // } else {
-      //   Router.go("/results/both");
-      // }
     });
-    const lastState = state.getState();
+
+    this.addEventListener("timeOut", this.outOfTime);
 
     this.innerHTML = `
-        <section class="main">
-            <!-- <header class="main--header">
-                <div class="header--names-container">
-                  <c-text variant="custom" custom="24" class="header--name">${
-                    lastState.players ? lastState.players[0] : ""
-                  }: ${lastState.score ? lastState.score : " "}</c-text>
-                  <c-text variant="custom" custom="24" class="header--name">${
-                    lastState.players ? lastState.players[1] : ""
-                  }: ${lastState.score ? lastState.score : " "}</c-text>
-                  </div>
-                <div class="header--room-container">
-                  <c-text variant="custom" custom="24" class="room-text">Sala</c-text>
-                  <c-text variant="custom" custom="24" class="roomId">${
-                    lastState.roomId
-                  }</c-text>
-              </div>
-            </header>
-            <section class="game-info">
-                <c-text variant="custom" custom="35" class="info ">Esperando a que ${
-                  lastState.players[0] == lastState.name
-                    ? lastState.players[1]
-                    : lastState.players[0]
-                } presione jugar</c-text>
-            </section> -->
-            
+        <section class="main">            
             <c-counter class="counter"></c-counter>
             <div class="main--jugada-container">
               <c-play class="jugada piedra" play="piedraLarge"></c-play>
@@ -186,6 +158,9 @@ class Choice extends HTMLElement {
         `;
 
     this.appendChild(style);
+  }
+  outOfTime() {
+    Router.go("/press-play");
   }
 }
 customElements.define("game-choice-page", Choice);
