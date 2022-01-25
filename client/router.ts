@@ -12,5 +12,6 @@ router.setRoutes([
   { path: "/choice", component: "game-choice-page" },
   { path: "/results/win", component: "result-win" },
   { path: "/results/loose", component: "result-loose" },
+  { path: "/results/both", component: "results-both-page" },
   { path: "/no-room", component: "no-room" },
 ]);

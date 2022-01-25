@@ -18,6 +18,7 @@ export function initPlay() {
     render() {
       const img = document.createElement("img");
       const att = this.getAttribute("play");
+      const selected = this.getAttribute("selected");
 
       if (att == "piedra") {
         img.setAttribute("src", piedraImg);
@@ -44,11 +45,24 @@ export function initPlay() {
         img.setAttribute("src", tijeraLargeImg);
         img.setAttribute("class", "jugadaLarge");
       }
+      if (selected == "piedra" && att.includes(selected)) {
+        img.setAttribute("src", piedraLargeImg);
+        img.setAttribute("class", "jugadaLargeSelected");
+      }
+      if (selected == "papel" && att.includes(selected)) {
+        img.setAttribute("src", papelLargeImg);
+        img.setAttribute("class", "jugadaLargeSelected");
+      }
+      if (selected == "tijera" && att.includes(selected)) {
+        img.setAttribute("src", tijeraLargeImg);
+        img.setAttribute("class", "jugadaLargeSelected");
+      }
 
       const style = document.createElement("style");
       style.innerHTML = `
                 .jugada {
                     transform: translateY(10px);
+                    display: inline-block;
                 }
 
                 @media (min-width: 769px) {
@@ -92,6 +106,30 @@ export function initPlay() {
                         opacity: .5;
                     }
                 }
+
+                .jugadaLargeSelected{
+                  transform: translateY(-50px) scale(1.5);
+                }
+
+                @keyframes oponent-select {
+                  0% {
+                      
+                      transform: translateY(0px);
+                  }
+                  100% {
+                      transform: translateY(-50px) scale(1.5);
+                  }
+              }
+
+              @keyframes oponent-notselect {
+                  0% {
+                            
+                      opacity: 1;
+                  }
+                  100% {
+                      opacity: .5;
+                  }
+              }
             `;
       img.appendChild(style);
       this.shadow.appendChild(img);

@@ -6,17 +6,17 @@ class WaitingRoom extends HTMLElement {
   shadow: ShadowRoot;
   players: { name: string }[] = [];
   connectedCallback() {
-    state.subscribe(() => {
-      state.readyToPlay(() => {
-        Router.go("/choice");
-      });
-    });
+    state.resetOnline();
+
     this.render();
   }
   render() {
     state.readyToPlay(() => {
-      Router.go("/choice");
+      state.resetStart(() => {
+        Router.go("/choice");
+      });
     });
+
     const lastState = state.getState();
 
     this.innerHTML = `
@@ -126,15 +126,11 @@ class WaitingRoom extends HTMLElement {
           width: 90%;
           max-width: 390px;
           margin: 0 auto;
-      }    
-
-      @media (min-height: 580px) {
-        .main--jugada-container {
           position: absolute;
-          width: 100%;
+          top: 100%;
           left: 50%;
-          transform: translate(-50%, 0);
-        }
+          transform: translate(-50%, -100%);
+      }    
         `;
 
     this.appendChild(style);

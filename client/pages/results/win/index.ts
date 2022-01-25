@@ -5,33 +5,28 @@ class resultWin extends HTMLElement {
   shadow: ShadowRoot;
 
   connectedCallback() {
-    this.render();
-    const button = document.querySelector(".button");
+    this.getHistory(() => {
+      this.render();
+      state.resetGameData();
 
-    button.addEventListener("click", (e) => {
-      e.preventDefault();
-      Router.go("/press-play");
-      // params.goTo("/dwf-m5-desafio/instructions");
+      const button = document.querySelector(".button");
+      button.addEventListener("click", (e) => {
+        e.preventDefault();
+        state.rtdbReseter(() => {
+          state.setOnlineTrue();
+          Router.go("/press-play");
+        });
+      });
     });
-
-    const scoreContainer = document.querySelector(".score-container");
-
-    state.subscribe(() => {
-      const scoreBoard = document.createElement("c-score");
-      scoreBoard.setAttribute("class", "score-board");
-      scoreContainer.firstChild
-        ? scoreContainer.firstChild.remove()
-        : scoreContainer.appendChild(scoreBoard);
-    });
-
-    // state.setState(state.getState());
   }
   render() {
     this.innerHTML = `
             <div class="container">
                 <div class="content">
                     <c-star variant="win"></c-star>
-                    <div class="score-container"></div>
+                    <div class="score-container">
+                      <c-score></c-score>
+                    </div>
                     <c-button class="button">Volver a Jugar</c-button>
                 </div>
             <div>
@@ -61,11 +56,28 @@ class resultWin extends HTMLElement {
                 @keyframes fadeIn {
                     100%{
                         opacity: 1;
+                        animation-fill-mode: both;
                     }
                 }
+                
+                .score-board {
+                  display: block;
+              }
             `;
 
     this.appendChild(style);
+  }
+  getHistory(cb?) {
+    const lastState = state.getState();
+    state.getHistoryFromFirestore(
+      lastState.rtdbRoomId,
+      lastState.roomId,
+      () => {
+        if (cb) {
+          cb();
+        }
+      }
+    );
   }
 }
 customElements.define("result-win", resultWin);

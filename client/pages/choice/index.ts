@@ -6,38 +6,9 @@ class Choice extends HTMLElement {
   shadow: ShadowRoot;
   players: { name: string }[] = [];
   connectedCallback() {
-    const lastState = state.getState();
-    // lastState.game = [];
-
+    state.resetStart();
     this.render();
-    state.subscribe(() => {
-      state.bothSetMove(() => {
-        state.setHistory(() => {
-          const lastState = state.getState();
-          const rtdbRoomId = lastState.rtdbRoomId;
-          const roomId = lastState.roomId;
-          // console.log(state.getState());
-          // const resultWhoWins = state.whoWins(state.getState().game[0]);
 
-          // console.log(state.getState().player, resultWhoWins);
-          const player = state.getState().player;
-
-          // console.log(state.getState().game);
-
-          state.getHistoryFromFirestore(rtdbRoomId, roomId);
-          console.log(state.getState().historyFromFirestore);
-          console.log(state.getState());
-
-          // if (resultWhoWins == -1) {
-          //   Router.go("/press-play");
-          // } else if (player == resultWhoWins) {
-          //   Router.go("/results/win");
-          // } else {
-          //   Router.go("/results/loose");
-          // }
-        });
-      });
-    });
     const piedraEl = this.querySelector(".piedra");
     const papelEl = this.querySelector(".papel");
     const tijeraEl = this.querySelector(".tijera");
@@ -45,28 +16,15 @@ class Choice extends HTMLElement {
     const jugadas = [piedraEl, papelEl, tijeraEl];
     jugadas.map((e: any) => {
       e.addEventListener("click", (e) => {
-        // console.log(e.target);
-
         e.target.shadow.firstChild.classList.add("select-move");
 
         gameAnimation();
 
         const move = e.target.className.split(" ")[1];
-        // console.log(move);
 
-        state.setMove(move);
-
-        // state.setComputerMove();
-        // const computerMove = state.getState().currentGame.computerPlay;
-
-        // renderComputerPlay(computerMove, computerJugadaContainer);
-
-        // setTimeout(() => {
-        //   handleWhoWins(move, computerMove);
-        // }, 3000);
-
-        // state.pushToHistory({ computerPlay: computerMove, myPlay: move });
-        // state.setState(state.getState());
+        state.setMove(move, () => {
+          // Router.go("/results/both");
+        });
       });
     });
 
@@ -84,6 +42,16 @@ class Choice extends HTMLElement {
     }
   }
   render() {
+    state.bothSetMove(() => {
+      // const lastState = state.getState();
+      // if (lastState.player == 0) {
+      state.setHistory(() => {
+        Router.go("/results/both");
+      });
+      // } else {
+      //   Router.go("/results/both");
+      // }
+    });
     const lastState = state.getState();
 
     this.innerHTML = `
@@ -111,6 +79,7 @@ class Choice extends HTMLElement {
                     : lastState.players[0]
                 } presione jugar</c-text>
             </section> -->
+            
             <c-counter class="counter"></c-counter>
             <div class="main--jugada-container">
               <c-play class="jugada piedra" play="piedraLarge"></c-play>

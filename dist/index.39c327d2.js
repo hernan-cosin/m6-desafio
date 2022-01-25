@@ -473,6 +473,7 @@ var _choice = require("./pages/choice");
 var _noRoom = require("./pages/no-room");
 var _win = require("./pages/results/win");
 var _loose = require("./pages/results/loose");
+var _both = require("./pages/results/both");
 var _router = require("./router");
 function main() {
     _button.initButtom();
@@ -486,7 +487,7 @@ function main() {
 }
 main();
 
-},{"./components/button":"2LIbR","./components/jugada":"xZJpl","./components/text":"7QAPx","./pages/home":"e9Za3","./router":"4zXxa","./pages/name":"8g1Nu","./components/form-name":"ghREk","./pages/code":"cJ8G0","./components/form-room":"87oyc","./pages/room":"bZinD","./pages/press-play":"gNShy","./components/counter":"jek4p","./pages/waiting-room":"lmp3n","./pages/choice":"bQKzh","./pages/no-room":"lRKzc","./components/score":"l7w21","./components/star":"gOzEQ","./pages/results/win":"5jPlg","./pages/results/loose":"5sbdE"}],"2LIbR":[function(require,module,exports) {
+},{"./components/button":"2LIbR","./components/jugada":"xZJpl","./components/text":"7QAPx","./pages/home":"e9Za3","./router":"4zXxa","./pages/name":"8g1Nu","./components/form-name":"ghREk","./pages/code":"cJ8G0","./components/form-room":"87oyc","./pages/room":"bZinD","./pages/press-play":"gNShy","./components/counter":"jek4p","./pages/waiting-room":"lmp3n","./pages/choice":"bQKzh","./pages/no-room":"lRKzc","./components/score":"l7w21","./components/star":"gOzEQ","./pages/results/win":"5jPlg","./pages/results/loose":"5sbdE","./pages/results/both":"e9ZSG"}],"2LIbR":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "initButtom", ()=>initButtom
@@ -572,6 +573,7 @@ function initPlay() {
         render() {
             const img = document.createElement("img");
             const att = this.getAttribute("play");
+            const selected = this.getAttribute("selected");
             if (att == "piedra") {
                 img.setAttribute("src", piedraImg);
                 img.setAttribute("class", "jugada");
@@ -597,8 +599,20 @@ function initPlay() {
                 img.setAttribute("src", tijeraLargeImg);
                 img.setAttribute("class", "jugadaLarge");
             }
+            if (selected == "piedra" && att.includes(selected)) {
+                img.setAttribute("src", piedraLargeImg);
+                img.setAttribute("class", "jugadaLargeSelected");
+            }
+            if (selected == "papel" && att.includes(selected)) {
+                img.setAttribute("src", papelLargeImg);
+                img.setAttribute("class", "jugadaLargeSelected");
+            }
+            if (selected == "tijera" && att.includes(selected)) {
+                img.setAttribute("src", tijeraLargeImg);
+                img.setAttribute("class", "jugadaLargeSelected");
+            }
             const style = document.createElement("style");
-            style.innerHTML = `\n                .jugada {\n                    transform: translateY(10px);\n                }\n\n                @media (min-width: 769px) {\n                    .jugada {\n                        width: 80px;\n                        height: auto;\n                    }\n                }\n\n                @media (min-width: 769px) {\n                    .papel {\n                        width: 135%;\n                    }\n                }\n\n                .select-move {\n                    animation: select 2s .75s;\n                }\n                \n                @keyframes select {\n                    0% {\n                        \n                        transform: translateY(0px);\n                    }\n                    100% {\n                        transform: translateY(-50px) scale(1.5);\n                    }\n                }\n\n                .transparent {\n                    animation: transparent 2s;\n                    animation-fill-mode: both;\n                }\n\n                @keyframes transparent {\n                    0% {\n                        \n                        opacity: 1;\n                    }\n                    100% {\n                        opacity: .5;\n                    }\n                }\n            `;
+            style.innerHTML = `\n                .jugada {\n                    transform: translateY(10px);\n                    display: inline-block;\n                }\n\n                @media (min-width: 769px) {\n                    .jugada {\n                        width: 80px;\n                        height: auto;\n                    }\n                }\n\n                @media (min-width: 769px) {\n                    .papel {\n                        width: 135%;\n                    }\n                }\n\n                .select-move {\n                    animation: select 2s .75s;\n                }\n                \n                @keyframes select {\n                    0% {\n                        \n                        transform: translateY(0px);\n                    }\n                    100% {\n                        transform: translateY(-50px) scale(1.5);\n                    }\n                }\n\n                .transparent {\n                    animation: transparent 2s;\n                    animation-fill-mode: both;\n                }\n\n                @keyframes transparent {\n                    0% {\n                        \n                        opacity: 1;\n                    }\n                    100% {\n                        opacity: .5;\n                    }\n                }\n\n                .jugadaLargeSelected{\n                  transform: translateY(-50px) scale(1.5);\n                }\n\n                @keyframes oponent-select {\n                  0% {\n                      \n                      transform: translateY(0px);\n                  }\n                  100% {\n                      transform: translateY(-50px) scale(1.5);\n                  }\n              }\n\n              @keyframes oponent-notselect {\n                  0% {\n                            \n                      opacity: 1;\n                  }\n                  100% {\n                      opacity: .5;\n                  }\n              }\n            `;
             img.appendChild(style);
             this.shadow.appendChild(img);
         }
@@ -3120,13 +3134,16 @@ router.setRoutes([
         component: "result-loose"
     },
     {
+        path: "/results/both",
+        component: "results-both-page"
+    },
+    {
         path: "/no-room",
         component: "no-room"
     }, 
 ]);
 
 },{"@vaadin/router":"kFgop"}],"8g1Nu":[function(require,module,exports) {
-// const bg = require("url:../../media/bg.svg");
 var _router = require("@vaadin/router");
 var _state = require("../../state");
 var _home = require("../home");
@@ -3149,9 +3166,13 @@ class Name extends HTMLElement {
                     name: inputEl.value
                 };
                 _state.state.signin(userData, ()=>{
-                    if (_state.state.getState().roomId.length > 0) _state.state.connectToRoom(()=>{
+                    if (_state.state.getState().roomId.length > 0) // si hay un roomId en el state
+                    // ingresado a traves de "Ingresar a una sala"
+                    _state.state.connectToRoom(()=>{
                         _state.state.accessToRoom(()=>{
                             _router.Router.go("/code");
+                        }, ()=>{
+                            _router.Router.go("/no-room");
                         });
                     });
                     else _state.state.askNewRoom(()=>{
@@ -3183,11 +3204,11 @@ parcelHelpers.export(exports, "state", ()=>state
 var _rtdb = require("./rtdb");
 var _map = require("lodash/map");
 var _mapDefault = parcelHelpers.interopDefault(_map);
-const API_BASE_URL = "http://localhost:3000";
+// const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "";
 const state = {
     data: {
         name: "",
-        //   email: "",
         userId: "",
         roomId: "",
         players: [],
@@ -3201,7 +3222,6 @@ const state = {
     setState (newState) {
         this.data = newState;
         for (const cb of this.listeners)cb();
-        localStorage.setItem("saved-state", JSON.stringify(this.getState()));
     },
     subscribe (callback) {
         this.listeners.push(callback);
@@ -3209,12 +3229,10 @@ const state = {
     setName (name) {
         const lastState = this.getState();
         lastState.name = name;
-        this.setState(lastState);
     },
     setRoomId (roomId) {
         const lastState = this.getState();
         lastState.roomId = roomId;
-        this.setState(lastState);
     },
     signin (User, cb) {
         fetch(API_BASE_URL + "/signin", {
@@ -3228,7 +3246,6 @@ const state = {
         }).then((data)=>{
             const lastState = this.getState();
             lastState.userId = data.id;
-            this.setState(lastState);
         }).then(()=>{
             if (cb) cb();
         });
@@ -3249,14 +3266,14 @@ const state = {
         }).then((res)=>{
             const lastState1 = this.getState();
             lastState1.roomId = res.id;
-            // lastState.pushKey = res.key;
-            state.setState(lastState1);
             if (cb) cb();
         });
         else console.error("No hay userId");
     },
-    accessToRoom (cb) {
+    accessToRoom (cb, cb2) {
         const lastState = this.getState();
+        const roomId = lastState.roomId;
+        const userId = lastState.userId;
         if (lastState.userId) fetch(API_BASE_URL + "/rooms/access", {
             method: "post",
             headers: {
@@ -3270,30 +3287,31 @@ const state = {
         }).then((res)=>{
             return res.json();
         }).then((res)=>{
-            console.log(res);
-            // console.log(res.validPlayer);
-            // if (res.validPlayer == true) {
-            // const lastState = this.getState();
-            // lastState.pushKey = res.key;
-            // state.setState(lastState);
-            const roomId = lastState.roomId;
-            const userId = lastState.userId;
-            fetch(API_BASE_URL + "/rooms/" + roomId + "?userId=" + userId).then((res1)=>{
-                return res1.json();
-            }).then((data)=>{
-                const lastState1 = this.getState();
-                lastState1.rtdbRoomId = data.rtdbRoomId;
-                this.setState(lastState1);
-            });
-            if (cb) cb();
-        // }
+            if (res.access == true) {
+                fetch(API_BASE_URL + "/rooms/" + roomId + "?userId=" + userId).then((res1)=>{
+                    return res1.json();
+                }).then((data)=>{
+                    const lastState1 = this.getState();
+                    lastState1.rtdbRoomId = data.rtdbRoomId;
+                });
+                if (cb) cb();
+            }
+            if (res.match == true) {
+                fetch(API_BASE_URL + "/rooms/" + roomId + "?userId=" + userId).then((res1)=>{
+                    return res1.json();
+                }).then((data)=>{
+                    const lastState1 = this.getState();
+                    lastState1.rtdbRoomId = data.rtdbRoomId;
+                });
+                if (cb) cb();
+            }
+            if (res.match == false) cb2();
         });
         else console.error("No hay userId");
     },
     // set in the state the rtdb room ID provided from backend
     connectToRoom (cb) {
         const lastState = this.getState();
-        console.log(lastState);
         const roomId = lastState.roomId;
         const userId = lastState.userId;
         fetch(API_BASE_URL + "/rooms/" + roomId + "?userId=" + userId).then((res)=>{
@@ -3301,14 +3319,13 @@ const state = {
         }).then((data)=>{
             const lastState1 = this.getState();
             lastState1.rtdbRoomId = data.rtdbRoomId;
-            this.setState(lastState1);
-            // console.log(state.getState());
             if (cb) cb();
         });
     },
-    listenToRoom (cb) {
+    // listen to player added to the rtdb and asigns player0 if the player is the creator of the room
+    // and player player1 if the player is the adversary
+    assignPlayerNum (cb) {
         const lastState = this.getState();
-        // console.log(lastState);
         const chatroomRef = _rtdb.rtdb.ref("/rooms/" + lastState.rtdbRoomId);
         chatroomRef.on("value", (snap)=>{
             const lastState1 = this.getState();
@@ -3318,23 +3335,24 @@ const state = {
             _mapDefault.default(playersFromServer, "player");
             if (lastState1.name == names[0]) lastState1.player = 0;
             else lastState1.player = 1;
-            this.setState(lastState1);
         });
         if (cb) cb();
     },
+    // listen to rtdb room and if both players are online
+    // execute callback
     bothOnline (cb) {
         const lastState = this.getState();
         const chatroomRef = _rtdb.rtdb.ref("/rooms/" + lastState.rtdbRoomId);
-        chatroomRef.once("value", (snap)=>{
+        chatroomRef.on("value", (snap)=>{
             const playersFromServer = snap.val()["current-game"];
             const online = _mapDefault.default(playersFromServer, "online");
             if (online[0] == true && online[1] == true) cb();
         });
     },
+    // set start = true in rtdb
     setStart (val, player, cb) {
         const lastState = state.getState();
         lastState.start = val;
-        state.setState(lastState);
         fetch(API_BASE_URL + "/rooms/start", {
             method: "post",
             headers: {
@@ -3350,6 +3368,8 @@ const state = {
             if (cb) cb();
         });
     },
+    // listen to rtdb room and if both players set start = true
+    // execute callback
     readyToPlay (cb) {
         const lastState = this.getState();
         const chatroomRef = _rtdb.rtdb.ref("/rooms/" + lastState.rtdbRoomId);
@@ -3359,61 +3379,36 @@ const state = {
             if (start[0] == true && start[1] == true) cb();
         });
     },
+    // sets the player choice in the RTDB
     setMove (move, cb) {
-        // sets the player choice in the RTDB
-        // then sets the state to triger the subscribe in the page and listen if both set their move
-        // when true it sets the history in firestor
         const lastState = this.getState();
         lastState["current-game"] = move;
-        fetch(API_BASE_URL + "/game/choice", {
+        return fetch(API_BASE_URL + "/game/choice", {
             method: "post",
             headers: {
                 "content-type": "application/json"
             },
             body: JSON.stringify({
-                // userId: lastState.userId,
                 player: lastState.player,
                 choice: lastState["current-game"],
                 roomId: lastState.rtdbRoomId
             })
-        }).then(()=>{
-            state.setState(lastState);
-            if (cb) cb();
         });
     },
-    setHistory (cb) {
-        // sets the history in firestore
-        const lastState = this.getState();
-        fetch(API_BASE_URL + "/rooms/choice", {
-            method: "post",
-            headers: {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify({
-                // userId: lastState.userId,
-                player: lastState.player,
-                history: lastState.game,
-                roomId: lastState.roomId
-            })
-        }).then(()=>{
-            if (cb) cb();
-        });
-    },
+    // listen to rtdb room and if both players set their move
+    // then set the move in the state
+    // execute callback
     bothSetMove (cb) {
-        // checks if both players have set their move in the RTDB
-        // if true it sets both moves in the state
-        // then ejecute callback
         const lastState = this.getState();
         const chatroomRef = _rtdb.rtdb.ref("/rooms/" + lastState.rtdbRoomId);
         chatroomRef.on("value", (snap)=>{
             const playersFromServer = snap.val()["current-game"];
-            // const choice = map(playersFromServer, "choice");
             const twoPlayersChoices = _mapDefault.default(playersFromServer, (p)=>{
                 return {
                     [p.player]: p.choice
                 };
             });
-            if (twoPlayersChoices[0][0] !== undefined && twoPlayersChoices[1][1] !== undefined) {
+            if (twoPlayersChoices[0][0] !== "" && twoPlayersChoices[1][1] !== "") {
                 lastState.game = [
                     {
                         ...twoPlayersChoices[0],
@@ -3424,10 +3419,28 @@ const state = {
             }
         });
     },
+    // sets the history in firestore
+    setHistory (cb) {
+        const lastState = this.getState();
+        if (lastState.player == 0) fetch(API_BASE_URL + "/rooms/choice", {
+            method: "post",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                player: lastState.player,
+                historyFromFront: lastState.game,
+                roomId: lastState.roomId
+            })
+        }).then(()=>{
+            if (cb) cb();
+        });
+        else cb();
+    },
+    // returns -1 if draw
+    // returns 1 if player one wins
+    // returns 0 if player zero wins
     whoWins (game, cb) {
-        // returns -1 if draw
-        // returns 1 if player one wins
-        // returns 0 if player zero wins
         if (game[0] == game[1]) return -1;
         if (game[0] == "piedra" && game[1] == "papel") return 1;
         if (game[0] == "piedra" && game[1] == "tijera") return 0;
@@ -3436,7 +3449,7 @@ const state = {
         if (game[0] == "tijera" && game[1] == "piedra") return 1;
         if (game[0] == "tijera" && game[1] == "papel") return 0;
     },
-    getHistoryFromFirestore (rtdbroomid, roomid) {
+    getHistoryFromFirestore (rtdbRoomId, roomId, cb) {
         const lastState = this.getState();
         function whoWins(g) {
             return state.whoWins(g);
@@ -3447,17 +3460,90 @@ const state = {
                 "content-type": "application/json"
             },
             body: JSON.stringify({
-                rtdbRoomId: lastState.rtdbRoomId,
-                roomId: lastState.roomId
+                rtdbRoomId: rtdbRoomId,
+                roomId: roomId
             })
         }).then((data)=>{
             return data.json();
         }).then((history)=>{
-            console.log(history);
             const mapeado = _mapDefault.default(history, whoWins);
-            lastState.historyFromFirestore = mapeado;
-            console.log(mapeado);
+            const winPlayerZero = mapeado.filter((g)=>{
+                return g == 0;
+            });
+            const winPlayerOne = mapeado.filter((g)=>{
+                return g == 1;
+            });
+            lastState.winPlayerZero = winPlayerZero;
+            lastState.winPlayerOne = winPlayerOne;
+        }).then(()=>{
+            if (cb) cb();
         });
+    },
+    rtdbReseter (cb) {
+        const lastState = this.getState();
+        fetch(API_BASE_URL + "/rtdb/reset/start-choice", {
+            method: "post",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                rtdbRoomId: lastState.rtdbRoomId,
+                player: lastState.player
+            })
+        }).then(()=>{
+            if (cb) {
+                cb();
+                lastState["current-game"] = "";
+                lastState.game = [];
+                lastState.winPlayerOne = [];
+                lastState.winPlayerZero = [];
+            }
+        });
+    },
+    resetOnline () {
+        const lastState = this.getState();
+        fetch(API_BASE_URL + "/rtdb/reset/online", {
+            method: "post",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                rtdbRoomId: lastState.rtdbRoomId,
+                player: lastState.player
+            })
+        });
+    },
+    setOnlineTrue () {
+        const lastState = this.getState();
+        fetch(API_BASE_URL + "/rtdb/set/online", {
+            method: "post",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                rtdbRoomId: lastState.rtdbRoomId,
+                player: lastState.player
+            })
+        });
+    },
+    resetStart (cb) {
+        const lastState = this.getState();
+        fetch(API_BASE_URL + "/rtdb/reset/start", {
+            method: "post",
+            headers: {
+                "content-type": "application/json"
+            },
+            body: JSON.stringify({
+                rtdbRoomId: lastState.rtdbRoomId,
+                player: lastState.player
+            })
+        }).then(()=>{
+            if (cb) cb();
+        });
+    },
+    resetGameData () {
+        const lastState = this.getState();
+        lastState.game = [];
     }
 };
 
@@ -64649,34 +64735,20 @@ var _state = require("../../state");
 var _router = require("@vaadin/router");
 class Code extends HTMLElement {
     connectedCallback() {
-        _state.state.listenToRoom();
-        this.updatePlayers();
-        _state.state.subscribe(()=>{
-            this.updatePlayers();
-            this.render();
-        // state.readyToPlay(() => {
-        //   Router.go("/press-play");
-        // });
-        });
+        _state.state.assignPlayerNum();
         this.render();
-    }
-    updatePlayers() {
-        const lastState = _state.state.getState();
-        this.players = lastState.players;
     }
     render() {
         _state.state.bothOnline(()=>{
+            const lastState = _state.state.getState();
+            lastState["current-game"] = "";
             _router.Router.go("/press-play");
         });
         const lastState = _state.state.getState();
-        this.innerHTML = `\n          <section class="main">\n            <header class="main--header">\n              <div class="header--names-container">\n                <c-text variant="custom" custom="24" class="header--name">${this.players[0] ? this.players[0] + ":" : ""} ${lastState.score ? lastState.score : " "}</c-text>\n                <c-text variant="custom" custom="24" class="header--name">${this.players[1] ? this.players[1] + ":" : ""} ${lastState.score ? lastState.score : " "}</c-text>\n              </div>\n              <div class="header--room-container">\n                <c-text variant="custom" custom="24" class="room-text">Sala</c-text>\n                <c-text variant="custom" custom="24" class="roomId">${lastState.roomId}</c-text>\n              </div>\n            </header>\n            <section class="code-info">\n                <c-text variant="custom" custom="35" class="info ">Compartí el codigo:</c-text>\n                <c-text variant="custom" custom="48" class="info ">${lastState.roomId}</c-text>\n                <c-text variant="custom" custom="35" class="info ">Con tu contrincante</c-text>\n            </section>\n            <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedra"></c-play>\n              <c-play class="jugada papel" play="papel"></c-play>\n              <c-play class="jugada tijera" play="tijera"></c-play>\n            </div>\n          </section>\n  \n          `;
+        this.innerHTML = `\n          <section class="main">\n            <header class="main--header">\n              <div class="header--names-container">\n                <c-text variant="custom" custom="24" class="header--name">${lastState.name ? lastState.name + ":" : ""} </c-text>\n              </div>\n              <div class="header--room-container">\n                <c-text variant="custom" custom="24" class="room-text">Sala</c-text>\n                <c-text variant="custom" custom="24" class="roomId">${lastState.roomId}</c-text>\n              </div>\n            </header>\n            <section class="code-info">\n                <c-text variant="custom" custom="35" class="info ">Compartí el codigo:</c-text>\n                <c-text variant="custom" custom="48" class="info ">${lastState.roomId}</c-text>\n                <c-text variant="custom" custom="35" class="info ">Con tu contrincante</c-text>\n            </section>\n            <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedra"></c-play>\n              <c-play class="jugada papel" play="papel"></c-play>\n              <c-play class="jugada tijera" play="tijera"></c-play>\n            </div>\n          </section>\n  \n          `;
         const style = document.createElement("style");
         style.innerHTML = `\n      @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n      @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n  \n          .main {\n            background-image: url(${_home.bg});\n            height: 100vh;\n            padding: 30px 0 0 0;\n          }\n  \n          .main--header {\n            display: flex;\n            justify-content: space-between;\n            font-family: 'Special Elite';\n            column-gap: 30px;\n            max-width: 960px;\n            margin: 0 auto 110px auto ;\n            padding: 0 30px;\n          }\n  \n          @media (min-width: 769px) {\n            .main--header {\n              margin: 0 auto 180px auto;\n            }\n          }\n            \n          .header--name {\n            display: block;\n            font-family: 'Special Elite', cursive;\n          }\n  \n          .room-text {\n            font-weight: bold;\n          }\n          \n          .roomId {\n            text-align: right;\n            font-weight: bold;\n          }\n  \n          .code-info {\n            max-width: 960px;\n            margin: 0 auto;\n            text-align: center;\n          }\n  \n          .info {\n            display: block;\n            font-family: 'Special Elite', cursive;\n            font-weight: bold;\n            margin: 0 0 30px 0 ;\n          }\n  \n          .main--jugada-container {\n            display: flex;\n            justify-content: space-between;\n            align-items: flex-end;\n            width: 90%;\n            max-width: 390px;\n            margin: 0 auto;\n        }    \n  \n        @media (min-height: 580px) {\n          .main--jugada-container {\n            position: absolute;\n            width: 100%;\n            bottom: 0;\n            left: 50%;\n            transform: translate(-50%, 0);\n          }\n        }\n          `;
         this.appendChild(style);
-    }
-    constructor(...args){
-        super(...args);
-        this.players = [];
     }
 }
 customElements.define("code-page", Code);
@@ -64752,29 +64824,32 @@ var _state = require("../../state");
 var _home = require("../home");
 class PressPlay extends HTMLElement {
     connectedCallback() {
-        // state.listenToRoom();
-        this.render();
-        // const formEl =
-        //   this.querySelector(".main--form").shadowRoot.querySelector(".form");
-        // const inputEl = this.querySelector(".main--form").shadowRoot.querySelector(
-        //   ".input-room-code"
-        // ) as any;
-        const buttonEl = this.querySelector(".game-info--button").shadowRoot.querySelector(".button");
-        buttonEl.addEventListener("click", (e)=>{
-            e.preventDefault;
-            const lastState = _state.state.getState();
-            console.log(lastState);
-            _state.state.setStart(true, lastState.player, ()=>{
-                _router.Router.go("/waiting-room");
+        this.getHistory(()=>{
+            _state.state.resetGameData();
+            _state.state.rtdbReseter();
+            this.render();
+            const buttonEl = this.querySelector(".game-info--button").shadowRoot.querySelector(".button");
+            buttonEl.addEventListener("click", (e)=>{
+                e.preventDefault;
+                const lastState = _state.state.getState();
+                _state.state.setStart(true, lastState.player, ()=>{
+                    _router.Router.go("/waiting-room");
+                });
             });
         });
     }
     render() {
         const lastState = _state.state.getState();
-        this.innerHTML = `\n        <section class="main">\n            <header class="main--header">\n                <div class="header--names-container">\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[0] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[1] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  </div>\n                <div class="header--room-container">\n                  <c-text variant="custom" custom="24" class="room-text">Sala</c-text>\n                  <c-text variant="custom" custom="24" class="roomId">${lastState.roomId}</c-text>\n              </div>\n            </header>\n            <section class="game-info">\n                <c-text variant="custom" custom="35" class="info ">Presioná jugar y elegí: piedra, papel o tijera antes de que pasen los 3 segundos.</c-text>\n                <c-button class="game-info--button">¡Jugar!</c-button>\n            </section>\n            <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedra"></c-play>\n              <c-play class="jugada papel" play="papel"></c-play>\n              <c-play class="jugada tijera" play="tijera"></c-play>\n            </div>\n        </section>\n\n        `;
+        this.innerHTML = `\n        <section class="main">\n            <header class="main--header">\n                <div class="header--names-container">\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[0] : ""}: ${lastState.winPlayerZero ? lastState.winPlayerZero.length : " "}</c-text>\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[1] : ""}: ${lastState.winPlayerOne ? lastState.winPlayerOne.length : " "}</c-text>\n                  </div>\n                <div class="header--room-container">\n                  <c-text variant="custom" custom="24" class="room-text">Sala</c-text>\n                  <c-text variant="custom" custom="24" class="roomId">${lastState.roomId}</c-text>\n              </div>\n            </header>\n            <section class="game-info">\n                <c-text variant="custom" custom="35" class="info ">Presioná jugar y elegí: piedra, papel o tijera antes de que pasen los 3 segundos.</c-text>\n                <c-button class="game-info--button">¡Jugar!</c-button>\n            </section>\n            <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedra"></c-play>\n              <c-play class="jugada papel" play="papel"></c-play>\n              <c-play class="jugada tijera" play="tijera"></c-play>\n            </div>\n        </section>\n\n        `;
         const style = document.createElement("style");
-        style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 40px 0 0 0;\n        }\n\n       /* @media (min-width: 769px) {\n          .main{\n            padding: 60px 0 0 0;\n          }\n        } */\n\n        .main--header {\n          display: flex;\n          justify-content: space-between;\n          font-family: 'Special Elite';\n          column-gap: 30px;\n          max-width: 960px;\n          margin: 0 auto 50px auto ;\n          padding: 0 30px;\n        }\n\n        @media (min-width: 769px) {\n          .main--header {\n            margin: 0 auto 60px auto;\n          }\n        }\n          \n        .header--name {\n          display: block;\n          font-family: 'Special Elite', cursive;\n        }\n\n        .room-text {\n          font-weight: bold;\n        }\n        \n        .roomId {\n          text-align: right;\n          font-weight: bold;\n        }\n\n        .game-info {\n          max-width: 960px;\n          margin: 0 auto;\n          text-align: center;\n        }\n\n        .info {\n          display: block;\n          max-width: 317px;\n          font-family: 'Special Elite', cursive;\n          font-weight: bold;\n          margin: 0 auto 30px auto;\n          text-align: center;\n        }\n\n        .game-info--button {\n          display: block;\n          margin: 0 0 80px 0;\n        }\n\n        .main--jugada-container {\n          display: flex;\n          justify-content: space-between;\n          align-items: flex-end;\n          width: 90%;\n          max-width: 390px;\n          margin: 0 auto;\n      }    \n\n      @media (min-height: 580px) {\n        .main--jugada-container {\n          position: absolute;\n          width: 100%;\n          left: 50%;\n          transform: translate(-50%, 0);\n        }\n        `;
+        style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 40px 0 0 0;\n        }\n\n       /* @media (min-width: 769px) {\n          .main{\n            padding: 60px 0 0 0;\n          }\n        } */\n\n        .main--header {\n          display: flex;\n          justify-content: space-between;\n          font-family: 'Special Elite';\n          column-gap: 30px;\n          max-width: 960px;\n          margin: 0 auto 50px auto ;\n          padding: 0 30px;\n        }\n\n        @media (min-width: 769px) {\n          .main--header {\n            margin: 0 auto 60px auto;\n          }\n        }\n          \n        .header--name {\n          display: block;\n          font-family: 'Special Elite', cursive;\n        }\n\n        .room-text {\n          font-weight: bold;\n        }\n        \n        .roomId {\n          text-align: right;\n          font-weight: bold;\n        }\n\n        .game-info {\n          max-width: 960px;\n          margin: 0 auto;\n          text-align: center;\n        }\n\n        .info {\n          display: block;\n          max-width: 317px;\n          font-family: 'Special Elite', cursive;\n          font-weight: bold;\n          margin: 0 auto 30px auto;\n          text-align: center;\n        }\n\n        .game-info--button {\n          display: block;\n          margin: 0 0 80px 0;\n        }\n\n        .main--jugada-container {\n          display: flex;\n          justify-content: space-between;\n          align-items: flex-end;\n          width: 90%;\n          max-width: 390px;\n          margin: 0 auto;\n      }    \n\n      @media (min-height: 580px) {\n        .main--jugada-container {\n          position: absolute;\n          width: 100%;\n          top: 100%;\n          left: 50%;\n          transform: translate(-50%, -100%);\n        }\n        `;
         this.appendChild(style);
+    }
+    getHistory(cb) {
+        const lastState = _state.state.getState();
+        _state.state.getHistoryFromFirestore(lastState.rtdbRoomId, lastState.roomId, ()=>{
+            if (cb) cb();
+        });
     }
     constructor(...args){
         super(...args);
@@ -64838,21 +64913,19 @@ var _state = require("../../state");
 var _home = require("../home");
 class WaitingRoom extends HTMLElement {
     connectedCallback() {
-        _state.state.subscribe(()=>{
-            _state.state.readyToPlay(()=>{
-                _router.Router.go("/choice");
-            });
-        });
+        _state.state.resetOnline();
         this.render();
     }
     render() {
         _state.state.readyToPlay(()=>{
-            _router.Router.go("/choice");
+            _state.state.resetStart(()=>{
+                _router.Router.go("/choice");
+            });
         });
         const lastState = _state.state.getState();
         this.innerHTML = `\n        <section class="main">\n            <header class="main--header">\n                <div class="header--names-container">\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[0] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[1] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  </div>\n                <div class="header--room-container">\n                  <c-text variant="custom" custom="24" class="room-text">Sala</c-text>\n                  <c-text variant="custom" custom="24" class="roomId">${lastState.roomId}</c-text>\n              </div>\n            </header>\n            <section class="game-info">\n                <c-text variant="custom" custom="35" class="info ">Esperando a que ${lastState.players[0] == lastState.name ? lastState.players[1] : lastState.players[0]} presione jugar</c-text>\n            </section>\n            <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedra"></c-play>\n              <c-play class="jugada papel" play="papel"></c-play>\n              <c-play class="jugada tijera" play="tijera"></c-play>\n            </div>\n        </section>\n\n        `;
         const style = document.createElement("style");
-        style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 40px 0 0 0;\n        }\n\n       /* @media (min-width: 769px) {\n          .main{\n            padding: 60px 0 0 0;\n          }\n        } */\n\n        .main--header {\n          display: flex;\n          justify-content: space-between;\n          font-family: 'Special Elite';\n          column-gap: 30px;\n          max-width: 960px;\n          margin: 0 auto 50px auto ;\n          padding: 0 30px;\n        }\n\n        @media (min-width: 769px) {\n          .main--header {\n            margin: 0 auto 60px auto;\n          }\n        }\n          \n        .header--name {\n          display: block;\n          font-family: 'Special Elite', cursive;\n        }\n\n        .room-text {\n          font-weight: bold;\n        }\n        \n        .roomId {\n          text-align: right;\n          font-weight: bold;\n        }\n\n        .game-info {\n          max-width: 960px;\n          margin: 0 auto;\n          text-align: center;\n        }\n\n        .info {\n          display: block;\n          max-width: 317px;\n          font-family: 'Special Elite', cursive;\n          font-weight: bold;\n          margin: 0 auto 30px auto;\n          text-align: center;\n        }\n\n        .game-info--button {\n          display: block;\n          margin: 0 0 80px 0;\n        }\n\n        .main--jugada-container {\n          display: flex;\n          justify-content: space-between;\n          align-items: flex-end;\n          width: 90%;\n          max-width: 390px;\n          margin: 0 auto;\n      }    \n\n      @media (min-height: 580px) {\n        .main--jugada-container {\n          position: absolute;\n          width: 100%;\n          left: 50%;\n          transform: translate(-50%, 0);\n        }\n        `;
+        style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 40px 0 0 0;\n        }\n\n       /* @media (min-width: 769px) {\n          .main{\n            padding: 60px 0 0 0;\n          }\n        } */\n\n        .main--header {\n          display: flex;\n          justify-content: space-between;\n          font-family: 'Special Elite';\n          column-gap: 30px;\n          max-width: 960px;\n          margin: 0 auto 50px auto ;\n          padding: 0 30px;\n        }\n\n        @media (min-width: 769px) {\n          .main--header {\n            margin: 0 auto 60px auto;\n          }\n        }\n          \n        .header--name {\n          display: block;\n          font-family: 'Special Elite', cursive;\n        }\n\n        .room-text {\n          font-weight: bold;\n        }\n        \n        .roomId {\n          text-align: right;\n          font-weight: bold;\n        }\n\n        .game-info {\n          max-width: 960px;\n          margin: 0 auto;\n          text-align: center;\n        }\n\n        .info {\n          display: block;\n          max-width: 317px;\n          font-family: 'Special Elite', cursive;\n          font-weight: bold;\n          margin: 0 auto 30px auto;\n          text-align: center;\n        }\n\n        .game-info--button {\n          display: block;\n          margin: 0 0 80px 0;\n        }\n\n        .main--jugada-container {\n          display: flex;\n          justify-content: space-between;\n          align-items: flex-end;\n          width: 90%;\n          max-width: 390px;\n          margin: 0 auto;\n          position: absolute;\n          top: 100%;\n          left: 50%;\n          transform: translate(-50%, -100%);\n      }    \n        `;
         this.appendChild(style);
     }
     constructor(...args){
@@ -64863,37 +64936,13 @@ class WaitingRoom extends HTMLElement {
 customElements.define("waiting-room-page", WaitingRoom);
 
 },{"@vaadin/router":"kFgop","../../state":"4KTlf","../home":"e9Za3"}],"bQKzh":[function(require,module,exports) {
+var _router = require("@vaadin/router");
 var _state = require("../../state");
 var _home = require("../home");
 class Choice extends HTMLElement {
     connectedCallback() {
-        const lastState = _state.state.getState();
-        // lastState.game = [];
+        _state.state.resetStart();
         this.render();
-        _state.state.subscribe(()=>{
-            _state.state.bothSetMove(()=>{
-                _state.state.setHistory(()=>{
-                    const lastState1 = _state.state.getState();
-                    const rtdbRoomId = lastState1.rtdbRoomId;
-                    const roomId = lastState1.roomId;
-                    // console.log(state.getState());
-                    // const resultWhoWins = state.whoWins(state.getState().game[0]);
-                    // console.log(state.getState().player, resultWhoWins);
-                    const player = _state.state.getState().player;
-                    // console.log(state.getState().game);
-                    _state.state.getHistoryFromFirestore(rtdbRoomId, roomId);
-                    console.log(_state.state.getState().historyFromFirestore);
-                    console.log(_state.state.getState());
-                // if (resultWhoWins == -1) {
-                //   Router.go("/press-play");
-                // } else if (player == resultWhoWins) {
-                //   Router.go("/results/win");
-                // } else {
-                //   Router.go("/results/loose");
-                // }
-                });
-            });
-        });
         const piedraEl = this.querySelector(".piedra");
         const papelEl = this.querySelector(".papel");
         const tijeraEl = this.querySelector(".tijera");
@@ -64904,20 +64953,12 @@ class Choice extends HTMLElement {
         ];
         jugadas.map((e)=>{
             e.addEventListener("click", (e1)=>{
-                // console.log(e.target);
                 e1.target.shadow.firstChild.classList.add("select-move");
                 gameAnimation();
                 const move = e1.target.className.split(" ")[1];
-                // console.log(move);
-                _state.state.setMove(move);
-            // state.setComputerMove();
-            // const computerMove = state.getState().currentGame.computerPlay;
-            // renderComputerPlay(computerMove, computerJugadaContainer);
-            // setTimeout(() => {
-            //   handleWhoWins(move, computerMove);
-            // }, 3000);
-            // state.pushToHistory({ computerPlay: computerMove, myPlay: move });
-            // state.setState(state.getState());
+                _state.state.setMove(move, ()=>{
+                // Router.go("/results/both");
+                });
             });
         });
         function gameAnimation() {
@@ -64932,8 +64973,18 @@ class Choice extends HTMLElement {
         }
     }
     render() {
+        _state.state.bothSetMove(()=>{
+            // const lastState = state.getState();
+            // if (lastState.player == 0) {
+            _state.state.setHistory(()=>{
+                _router.Router.go("/results/both");
+            });
+        // } else {
+        //   Router.go("/results/both");
+        // }
+        });
         const lastState = _state.state.getState();
-        this.innerHTML = `\n        <section class="main">\n            <!-- <header class="main--header">\n                <div class="header--names-container">\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[0] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[1] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  </div>\n                <div class="header--room-container">\n                  <c-text variant="custom" custom="24" class="room-text">Sala</c-text>\n                  <c-text variant="custom" custom="24" class="roomId">${lastState.roomId}</c-text>\n              </div>\n            </header>\n            <section class="game-info">\n                <c-text variant="custom" custom="35" class="info ">Esperando a que ${lastState.players[0] == lastState.name ? lastState.players[1] : lastState.players[0]} presione jugar</c-text>\n            </section> -->\n            <c-counter class="counter"></c-counter>\n            <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedraLarge"></c-play>\n              <c-play class="jugada papel" play="papelLarge"></c-play>\n              <c-play class="jugada tijera" play="tijeraLarge"></c-play>\n            </div>\n        </section>\n\n        `;
+        this.innerHTML = `\n        <section class="main">\n            <!-- <header class="main--header">\n                <div class="header--names-container">\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[0] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  <c-text variant="custom" custom="24" class="header--name">${lastState.players ? lastState.players[1] : ""}: ${lastState.score ? lastState.score : " "}</c-text>\n                  </div>\n                <div class="header--room-container">\n                  <c-text variant="custom" custom="24" class="room-text">Sala</c-text>\n                  <c-text variant="custom" custom="24" class="roomId">${lastState.roomId}</c-text>\n              </div>\n            </header>\n            <section class="game-info">\n                <c-text variant="custom" custom="35" class="info ">Esperando a que ${lastState.players[0] == lastState.name ? lastState.players[1] : lastState.players[0]} presione jugar</c-text>\n            </section> -->\n            \n            <c-counter class="counter"></c-counter>\n            <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedraLarge"></c-play>\n              <c-play class="jugada papel" play="papelLarge"></c-play>\n              <c-play class="jugada tijera" play="tijeraLarge"></c-play>\n            </div>\n        </section>\n\n        `;
         const style = document.createElement("style");
         style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 40px 0 0 0;\n        }\n\n       /* @media (min-width: 769px) {\n          .main{\n            padding: 60px 0 0 0;\n          }\n        } */\n\n        .main--header {\n          display: flex;\n          justify-content: space-between;\n          font-family: 'Special Elite';\n          column-gap: 30px;\n          max-width: 960px;\n          margin: 0 auto 50px auto ;\n          padding: 0 30px;\n        }\n\n        @media (min-width: 769px) {\n          .main--header {\n            margin: 0 auto 60px auto;\n          }\n        }\n          \n        .header--name {\n          display: block;\n          font-family: 'Special Elite', cursive;\n        }\n\n        .room-text {\n          font-weight: bold;\n        }\n        \n        .roomId {\n          text-align: right;\n          font-weight: bold;\n        }\n\n        .game-info {\n          max-width: 960px;\n          margin: 0 auto;\n          text-align: center;\n        }\n\n        .info {\n          display: block;\n          max-width: 317px;\n          font-family: 'Special Elite', cursive;\n          font-weight: bold;\n          margin: 0 auto 30px auto;\n          text-align: center;\n        }\n\n        .game-info--button {\n          display: block;\n          margin: 0 0 80px 0;\n        }\n\n        .counter{\n          display: flex;\n          justify-content: center;\n          margin: 0 0 30px 0;\n        }\n\n        .main--jugada-container {\n          display: flex;\n          justify-content: space-between;\n          align-items: flex-end;\n          width: 90%;\n          max-width: 390px;\n          margin: 0 auto;\n      }    \n\n      @media (min-height: 580px) {\n        .main--jugada-container {\n          position: fixed;\n          top: 100%;\n          width: 100%;\n          left: 50%;\n          transform: translate(-50%, -100%);\n        }\n\n        .jugada {\n          cursor: pointer;\n        }\n        `;
         this.appendChild(style);
@@ -64945,7 +64996,7 @@ class Choice extends HTMLElement {
 }
 customElements.define("game-choice-page", Choice);
 
-},{"../../state":"4KTlf","../home":"e9Za3"}],"lRKzc":[function(require,module,exports) {
+},{"../../state":"4KTlf","../home":"e9Za3","@vaadin/router":"kFgop"}],"lRKzc":[function(require,module,exports) {
 var _home = require("../home");
 class NoRoom extends HTMLElement {
     connectedCallback() {
@@ -64995,9 +65046,9 @@ class NoRoom extends HTMLElement {
     // });
     }
     render() {
-        this.innerHTML = `\n        <section class="main">\n            <c-text class="main--title" variant="title"> No Room </c-text>\n        </section>\n\n        `;
+        this.innerHTML = `\n        <section class="main">\n          <c-text class="main--title" variant="title"> Piedra Papel ó Tijera </c-text>\n          <c-text variant="custom" custom="35" class="info ">\n            Ups, esta sala está completa y tu nombre no coincide con nadie en la sala.\n          </c-text>\n          <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedra"></c-play>\n              <c-play class="jugada papel" play="papel"></c-play>\n              <c-play class="jugada tijera" play="tijera"></c-play>\n          </div>\n        </section>\n\n        `;
         const style = document.createElement("style");
-        style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 70px 0 0 0;\n        }\n\n        @media (min-width: 769px) {\n          .main{\n            padding: 60px 0 0 0;\n          }\n        }\n\n        .main--title {\n            display: block;\n            min-width: 270px;\n            max-width: 280px;\n            margin: 0 auto 55px auto;\n            color: var(--principal);\n            font-family: 'Special Elite', cursive;\n        }\n\n        .main--form {\n            display: block;\n            width: fit-content;\n            margin: 0 auto;\n        }\n        `;
+        style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 70px 0 0 0;\n        }\n\n        @media (min-width: 769px) {\n          .main{\n            padding: 60px 0 0 0;\n          }\n        }\n\n        .main--title {\n            display: block;\n            min-width: 270px;\n            max-width: 280px;\n            margin: 0 auto 55px auto;\n            color: var(--principal);\n            font-family: 'Special Elite', cursive;\n        }\n\n        .info {\n          display: block;\n          max-width: 317px;\n          font-family: 'Special Elite', cursive;\n          font-weight: bold;\n          margin: 0 auto 30px auto;\n          text-align: center;\n        }\n\n        .main--jugada-container {\n          display: flex;\n          justify-content: space-between;\n          align-items: flex-end;\n          width: 90%;\n          max-width: 390px;\n          margin: 0 auto;\n      }    \n\n      @media (min-height: 700px) {\n        .main--jugada-container {\n          position: absolute;\n          width: 100%;\n          bottom: 0;\n          left: 50%;\n          transform: translate(-50%, 0);\n        }\n        `;
         this.appendChild(style);
     }
 }
@@ -65022,25 +65073,13 @@ function initScore() {
         }
         render() {
             const lastState = _state.state.getState();
+            const winsPlayerZero = lastState.winPlayerZero ? lastState.winPlayerZero.length : "";
+            const winsPlayerOne = lastState.winPlayerOne ? lastState.winPlayerOne.length : "";
             const div = document.createElement("div");
             div.setAttribute("class", "score-container");
-            //   const history = state.getState().history;
-            //   let computerWins = [];
-            //   let playerWins = [];
-            //   history.map((h) => {
-            //     const winner = state.whoWins(h.myPlay, h.computerPlay);
-            //     if (winner == 0) {
-            //       computerWins.push(winner);
-            //     }
-            //     if (winner == 1) {
-            //       playerWins.push(winner);
-            //     }
-            //   });
-            //   const myScore = playerWins.length;
-            //   const machineScore = computerWins.length;
             const player0 = lastState.players ? lastState.players[0] : "";
             const player1 = lastState.players ? lastState.players[1] : "";
-            div.innerHTML = `\n                <c-text class="score-title" variant="subtitle">Score</c-text>\n                <c-text class="score"> ${player0}:</c-text>\n                <c-text class="score"> ${player1}: </c-text>\n            `;
+            div.innerHTML = `\n                <c-text class="score-title" variant="subtitle">Score</c-text>\n                <c-text class="score"> ${player0}: ${winsPlayerZero}</c-text>\n                <c-text class="score"> ${player1}: ${winsPlayerOne}</c-text>\n            `;
             const style = document.createElement("style");
             style.innerHTML = `\n      @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n                .score-container {\n                    width: 259px;\n                    height: 217px;\n                    border: 10px solid var(--black);\n                    border-radius: 10px;\n                    margin-bottom: 20px;\n                    background-color: var(--white);\n                }\n\n                .score-title {\n                    font-family: 'Odibee Sans', cursive;\n                    text-align: center;\n                }\n\n                .score {\n                  font-family: 'Odibee Sans', cursive;\n                  text-align: right;\n                  display: block;\n                  padding: 0 10px 0 0;\n                }\n            `;
             this.shadow.appendChild(div);
@@ -65090,26 +65129,30 @@ var _state = require("../../../state");
 var _router = require("@vaadin/router");
 class resultWin extends HTMLElement {
     connectedCallback() {
-        this.render();
-        const button = document.querySelector(".button");
-        button.addEventListener("click", (e)=>{
-            e.preventDefault();
-            _router.Router.go("/press-play");
-        // params.goTo("/dwf-m5-desafio/instructions");
+        this.getHistory(()=>{
+            this.render();
+            _state.state.resetGameData();
+            const button = document.querySelector(".button");
+            button.addEventListener("click", (e)=>{
+                e.preventDefault();
+                _state.state.rtdbReseter(()=>{
+                    _state.state.setOnlineTrue();
+                    _router.Router.go("/press-play");
+                });
+            });
         });
-        const scoreContainer = document.querySelector(".score-container");
-        _state.state.subscribe(()=>{
-            const scoreBoard = document.createElement("c-score");
-            scoreBoard.setAttribute("class", "score-board");
-            scoreContainer.firstChild ? scoreContainer.firstChild.remove() : scoreContainer.appendChild(scoreBoard);
-        });
-    // state.setState(state.getState());
     }
     render() {
-        this.innerHTML = `\n            <div class="container">\n                <div class="content">\n                    <c-star variant="win"></c-star>\n                    <div class="score-container"></div>\n                    <c-button class="button">Volver a Jugar</c-button>\n                </div>\n            <div>\n            `;
+        this.innerHTML = `\n            <div class="container">\n                <div class="content">\n                    <c-star variant="win"></c-star>\n                    <div class="score-container">\n                      <c-score></c-score>\n                    </div>\n                    <c-button class="button">Volver a Jugar</c-button>\n                </div>\n            <div>\n            `;
         const style = document.createElement("style");
-        style.innerHTML = `\n                .container {\n                  padding: 20px;\n                  background-color: var(--win-secondary);\n                  overflow: auto;\n                }\n        \n                .content {\n                    animation: fadeIn 2s;\n                    animation-fill-mode: both;\n                    opacity: 0;\n                    max-width: 769px;\n                    height: 100vh;\n                    margin: 0 auto;\n                    display: flex;\n                    flex-direction: column;\n                    align-items: center;\n                    justify-content: space-between;\n                    padding: 30px 0;\n                }\n      \n                @keyframes fadeIn {\n                    100%{\n                        opacity: 1;\n                    }\n                }\n            `;
+        style.innerHTML = `\n                .container {\n                  padding: 20px;\n                  background-color: var(--win-secondary);\n                  overflow: auto;\n                }\n        \n                .content {\n                    animation: fadeIn 2s;\n                    animation-fill-mode: both;\n                    opacity: 0;\n                    max-width: 769px;\n                    height: 100vh;\n                    margin: 0 auto;\n                    display: flex;\n                    flex-direction: column;\n                    align-items: center;\n                    justify-content: space-between;\n                    padding: 30px 0;\n                }\n      \n                @keyframes fadeIn {\n                    100%{\n                        opacity: 1;\n                        animation-fill-mode: both;\n                    }\n                }\n                \n                .score-board {\n                  display: block;\n              }\n            `;
         this.appendChild(style);
+    }
+    getHistory(cb) {
+        const lastState = _state.state.getState();
+        _state.state.getHistoryFromFirestore(lastState.rtdbRoomId, lastState.roomId, ()=>{
+            if (cb) cb();
+        });
     }
 }
 customElements.define("result-win", resultWin);
@@ -65119,30 +65162,105 @@ var _state = require("../../../state");
 var _router = require("@vaadin/router");
 class resultLoose extends HTMLElement {
     connectedCallback() {
-        this.render();
-        const button = document.querySelector(".button");
-        button.addEventListener("click", (e)=>{
-            e.preventDefault();
-            _router.Router.go("/press-play");
-        // params.goTo("/dwf-m5-desafio/instructions");
+        this.getHistory(()=>{
+            this.render();
+            _state.state.resetGameData();
+            const button = document.querySelector(".button");
+            button.addEventListener("click", (e)=>{
+                e.preventDefault();
+                _state.state.rtdbReseter(()=>{
+                    _state.state.setOnlineTrue();
+                    _router.Router.go("/press-play");
+                });
+            });
         });
-        const scoreContainer = document.querySelector(".score-container");
-        _state.state.subscribe(()=>{
-            const scoreBoard = document.createElement("c-score");
-            scoreBoard.setAttribute("class", "score-board");
-            scoreContainer.firstChild ? scoreContainer.firstChild.remove() : scoreContainer.appendChild(scoreBoard);
-        });
-    // state.setState(state.getState());
     }
     render() {
-        this.innerHTML = `\n            <div class="container">\n                <div class="content">\n                    <c-star variant="loose"></c-star>\n                    <div class="score-container"></div>\n                    <c-button class="button">Volver a Jugar</c-button>\n                </div>\n            <div>\n            `;
+        this.innerHTML = `\n            <div class="container">\n                <div class="content">\n                    <c-star variant="loose"></c-star>\n                    <div class="score-container">\n                      <c-score></c-score>\n                    </div>\n                    <c-button class="button">Volver a Jugar</c-button>\n                </div>\n            <div>\n            `;
         const style = document.createElement("style");
         style.innerHTML = `\n            .container {\n                padding: 20px;\n                background-color: var(--loose-secondary);\n                overflow: auto;\n            }\n\n            .content {\n                animation: fadeIn 2s;\n                animation-fill-mode: both;\n                opacity: 0;\n                max-width: 769px;\n                height: 100vh;\n                margin: 0 auto;\n                display: flex;\n                flex-direction: column;\n                align-items: center;\n                justify-content: space-between;\n                padding: 30px 0;\n            }\n\n            @keyframes fadeIn{\n                100% {\n                    opacity: 1;\n                    animation-fill-mode: both;\n                }\n            }\n\n            .score-board {\n                display: block;\n            }       \n            `;
         this.appendChild(style);
     }
+    getHistory(cb) {
+        const lastState = _state.state.getState();
+        _state.state.getHistoryFromFirestore(lastState.rtdbRoomId, lastState.roomId, ()=>{
+            if (cb) cb();
+        });
+    }
 }
 customElements.define("result-loose", resultLoose);
 
-},{"../../../state":"4KTlf","@vaadin/router":"kFgop"}]},["gcK6j","4L6tv"], "4L6tv", "parcelRequireca0a")
+},{"../../../state":"4KTlf","@vaadin/router":"kFgop"}],"e9ZSG":[function(require,module,exports) {
+var _router = require("@vaadin/router");
+var _state = require("../../../state");
+var _home = require("../../home");
+class resultsBoth extends HTMLElement {
+    connectedCallback() {
+        const lastState = _state.state.getState();
+        const myPlay = lastState["current-game"];
+        this.render();
+        // mis jugadas
+        const piedraEl = this.querySelector(".main--jugada-container").querySelector(".piedra");
+        const papelEl = this.querySelector(".main--jugada-container").querySelector(".papel");
+        const tijeraEl = this.querySelector(".main--jugada-container").querySelector(".tijera");
+        const jugadas = [
+            piedraEl,
+            papelEl,
+            tijeraEl
+        ];
+        const miJugada = jugadas.find((j)=>{
+            return j.className.includes(myPlay);
+        });
+        const misNoJugadas = jugadas.filter((j)=>{
+            return !j.className.includes(myPlay);
+        });
+        misNoJugadas.map((j)=>{
+            j.shadowRoot.querySelector("img").setAttribute("style", "opacity: .5;");
+        });
+        miJugada.setAttribute("selected", myPlay);
+        miJugada.shadowRoot.querySelector("img").setAttribute("style", "transform: translateY(-50px) scale(1.5);");
+        //   oponente jugadas
+        const oponentPlay = lastState["game"][0][`${lastState.player == 0 ? 1 : 0}`];
+        const oponentPiedraEl = this.querySelector(".oponent--jugada-container").querySelector(".piedra");
+        const oponentPapelEl = this.querySelector(".oponent--jugada-container").querySelector(".papel");
+        const oponentTijeraEl = this.querySelector(".oponent--jugada-container").querySelector(".tijera");
+        const oponenteJugadas = [
+            oponentPiedraEl,
+            oponentPapelEl,
+            oponentTijeraEl
+        ];
+        const oponenteJugada = oponenteJugadas.find((j)=>{
+            return j.className.includes(oponentPlay);
+        });
+        const oponenteNoJugadas = oponenteJugadas.filter((j)=>{
+            return !j.className.includes(oponentPlay);
+        });
+        oponenteNoJugadas.map((j)=>{
+            j.shadowRoot.querySelector("img").setAttribute("style", "animation: oponent-notselect 2s .75s; animation-fill-mode: both;");
+        });
+        oponenteJugada.setAttribute("selected", oponentPlay);
+        oponenteJugada.shadowRoot.querySelector("img").setAttribute("style", "animation: oponent-select 2s .75s; animation-fill-mode: both;");
+        setTimeout(()=>{
+            const lastState1 = _state.state.getState();
+            const resultWhoWins = _state.state.whoWins(lastState1.game[0]);
+            if (resultWhoWins == -1) _router.Router.go("/press-play");
+            if (lastState1.player == resultWhoWins) _router.Router.go("/results/win");
+            if (lastState1.player !== resultWhoWins && resultWhoWins !== -1) _router.Router.go("/results/loose");
+        }, 2500);
+    }
+    render() {
+        this.innerHTML = `\n        <section class="main">\n            <div class="oponent--jugada-container">\n              <c-play class="jugada piedra" play="piedraLarge"></c-play>\n              <c-play class="jugada papel" play="papelLarge"></c-play>\n              <c-play class="jugada tijera" play="tijeraLarge"></c-play>\n            </div>\n            <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedraLarge"></c-play>\n              <c-play class="jugada papel" play="papelLarge"></c-play>\n              <c-play class="jugada tijera" play="tijeraLarge"></c-play>\n            </div>\n        </section>\n\n        `;
+        const style = document.createElement("style");
+        style.innerHTML = `\n    @import url('https://fonts.googleapis.com/css2?family=Odibee+Sans&display=swap');\n    @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');\n\n        .main {\n          background-image: url(${_home.bg});\n          height: 100vh;\n          padding: 0;\n          display: flex;\n          flex-direction: column;\n          justify-content: space-between;\n          align-items: center;\n        }\n\n       /* @media (min-width: 769px) {\n          .main{\n            padding: 60px 0 0 0;\n          }\n        } */\n\n        .main--header {\n          display: flex;\n          justify-content: space-between;\n          font-family: 'Special Elite';\n          column-gap: 30px;\n          max-width: 960px;\n          margin: 0 auto 50px auto ;\n          padding: 0 30px;\n        }\n\n        @media (min-width: 769px) {\n          .main--header {\n            margin: 0 auto 60px auto;\n          }\n        }\n          \n        .header--name {\n          display: block;\n          font-family: 'Special Elite', cursive;\n        }\n\n        .room-text {\n          font-weight: bold;\n        }\n        \n        .roomId {\n          text-align: right;\n          font-weight: bold;\n        }\n\n        .game-info {\n          max-width: 960px;\n          margin: 0 auto;\n          text-align: center;\n        }\n\n        .info {\n          display: block;\n          max-width: 317px;\n          font-family: 'Special Elite', cursive;\n          font-weight: bold;\n          margin: 0 auto 30px auto;\n          text-align: center;\n        }\n\n        .game-info--button {\n          display: block;\n          margin: 0 0 80px 0;\n        }\n\n        .counter{\n          display: flex;\n          justify-content: center;\n          margin: 0 0 30px 0;\n        }\n\n        .main--jugada-container {\n          display: flex;\n          justify-content: space-between;\n          align-items: flex-end;\n          width: 90%;\n          max-width: 390px;\n          margin: 0 auto;\n        }    \n\n        .oponent--jugada-container {\n            transform: rotate(180deg);\n        }\n\n      @media (min-height: 580px) {\n        .main--jugada-container {\n          position: fixed;\n          top: 100%;\n          width: 100%;\n          left: 50%;\n          transform: translate(-50%, -100%);\n        }\n\n        .jugada {\n          cursor: default;\n        }\n        `;
+        this.appendChild(style);
+    }
+    constructor(...args){
+        super(...args);
+        this.players = [];
+    }
+}
+customElements.define("results-both-page", resultsBoth);
+
+},{"@vaadin/router":"kFgop","../../../state":"4KTlf","../../home":"e9Za3"}]},["gcK6j","4L6tv"], "4L6tv", "parcelRequireca0a")
 
 //# sourceMappingURL=index.39c327d2.js.map

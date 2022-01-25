@@ -6,28 +6,23 @@ class PressPlay extends HTMLElement {
   shadow: ShadowRoot;
   players: { name: string }[] = [];
   connectedCallback() {
-    // state.listenToRoom();
+    this.getHistory(() => {
+      state.resetGameData();
+      state.rtdbReseter();
+      this.render();
 
-    this.render();
+      const buttonEl =
+        this.querySelector(".game-info--button").shadowRoot.querySelector(
+          ".button"
+        );
 
-    // const formEl =
-    //   this.querySelector(".main--form").shadowRoot.querySelector(".form");
-    // const inputEl = this.querySelector(".main--form").shadowRoot.querySelector(
-    //   ".input-room-code"
-    // ) as any;
+      buttonEl.addEventListener("click", (e) => {
+        e.preventDefault;
+        const lastState = state.getState();
 
-    const buttonEl =
-      this.querySelector(".game-info--button").shadowRoot.querySelector(
-        ".button"
-      );
-
-    buttonEl.addEventListener("click", (e) => {
-      e.preventDefault;
-      const lastState = state.getState();
-      console.log(lastState);
-
-      state.setStart(true, lastState.player, () => {
-        Router.go("/waiting-room");
+        state.setStart(true, lastState.player, () => {
+          Router.go("/waiting-room");
+        });
       });
     });
   }
@@ -41,10 +36,14 @@ class PressPlay extends HTMLElement {
                 <div class="header--names-container">
                   <c-text variant="custom" custom="24" class="header--name">${
                     lastState.players ? lastState.players[0] : ""
-                  }: ${lastState.score ? lastState.score : " "}</c-text>
+                  }: ${
+      lastState.winPlayerZero ? lastState.winPlayerZero.length : " "
+    }</c-text>
                   <c-text variant="custom" custom="24" class="header--name">${
                     lastState.players ? lastState.players[1] : ""
-                  }: ${lastState.score ? lastState.score : " "}</c-text>
+                  }: ${
+      lastState.winPlayerOne ? lastState.winPlayerOne.length : " "
+    }</c-text>
                   </div>
                 <div class="header--room-container">
                   <c-text variant="custom" custom="24" class="room-text">Sala</c-text>
@@ -145,12 +144,25 @@ class PressPlay extends HTMLElement {
         .main--jugada-container {
           position: absolute;
           width: 100%;
+          top: 100%;
           left: 50%;
-          transform: translate(-50%, 0);
+          transform: translate(-50%, -100%);
         }
         `;
 
     this.appendChild(style);
+  }
+  getHistory(cb?) {
+    const lastState = state.getState();
+    state.getHistoryFromFirestore(
+      lastState.rtdbRoomId,
+      lastState.roomId,
+      () => {
+        if (cb) {
+          cb();
+        }
+      }
+    );
   }
 }
 customElements.define("press-play-page", PressPlay);

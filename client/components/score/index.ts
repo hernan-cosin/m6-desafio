@@ -13,33 +13,24 @@ export function initScore() {
     }
     render() {
       const lastState = state.getState();
+
+      const winsPlayerZero = lastState.winPlayerZero
+        ? lastState.winPlayerZero.length
+        : "";
+      const winsPlayerOne = lastState.winPlayerOne
+        ? lastState.winPlayerOne.length
+        : "";
+
       const div = document.createElement("div");
       div.setAttribute("class", "score-container");
 
-      //   const history = state.getState().history;
-
-      //   let computerWins = [];
-      //   let playerWins = [];
-
-      //   history.map((h) => {
-      //     const winner = state.whoWins(h.myPlay, h.computerPlay);
-      //     if (winner == 0) {
-      //       computerWins.push(winner);
-      //     }
-      //     if (winner == 1) {
-      //       playerWins.push(winner);
-      //     }
-      //   });
-
-      //   const myScore = playerWins.length;
-      //   const machineScore = computerWins.length;
       const player0 = lastState.players ? lastState.players[0] : "";
       const player1 = lastState.players ? lastState.players[1] : "";
 
       div.innerHTML = `
                 <c-text class="score-title" variant="subtitle">Score</c-text>
-                <c-text class="score"> ${player0}:</c-text>
-                <c-text class="score"> ${player1}: </c-text>
+                <c-text class="score"> ${player0}: ${winsPlayerZero}</c-text>
+                <c-text class="score"> ${player1}: ${winsPlayerOne}</c-text>
             `;
       const style = document.createElement("style");
       style.innerHTML = `

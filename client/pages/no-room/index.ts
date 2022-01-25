@@ -64,7 +64,15 @@ class NoRoom extends HTMLElement {
   render() {
     this.innerHTML = `
         <section class="main">
-            <c-text class="main--title" variant="title"> No Room </c-text>
+          <c-text class="main--title" variant="title"> Piedra Papel ó Tijera </c-text>
+          <c-text variant="custom" custom="35" class="info ">
+            Ups, esta sala está completa y tu nombre no coincide con nadie en la sala.
+          </c-text>
+          <div class="main--jugada-container">
+              <c-play class="jugada piedra" play="piedra"></c-play>
+              <c-play class="jugada papel" play="papel"></c-play>
+              <c-play class="jugada tijera" play="tijera"></c-play>
+          </div>
         </section>
 
         `;
@@ -94,10 +102,31 @@ class NoRoom extends HTMLElement {
             font-family: 'Special Elite', cursive;
         }
 
-        .main--form {
-            display: block;
-            width: fit-content;
-            margin: 0 auto;
+        .info {
+          display: block;
+          max-width: 317px;
+          font-family: 'Special Elite', cursive;
+          font-weight: bold;
+          margin: 0 auto 30px auto;
+          text-align: center;
+        }
+
+        .main--jugada-container {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+          width: 90%;
+          max-width: 390px;
+          margin: 0 auto;
+      }    
+
+      @media (min-height: 700px) {
+        .main--jugada-container {
+          position: absolute;
+          width: 100%;
+          bottom: 0;
+          left: 50%;
+          transform: translate(-50%, 0);
         }
         `;
 

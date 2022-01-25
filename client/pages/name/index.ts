@@ -1,4 +1,3 @@
-// const bg = require("url:../../media/bg.svg");
 import { Router } from "@vaadin/router";
 import { state } from "../../state";
 import { bg } from "../home";
@@ -35,10 +34,17 @@ class Name extends HTMLElement {
 
         state.signin(userData, () => {
           if (state.getState().roomId.length > 0) {
+            // si hay un roomId en el state
+            // ingresado a traves de "Ingresar a una sala"
             state.connectToRoom(() => {
-              state.accessToRoom(() => {
-                Router.go("/code");
-              });
+              state.accessToRoom(
+                () => {
+                  Router.go("/code");
+                },
+                () => {
+                  Router.go("/no-room");
+                }
+              );
             });
           } else {
             state.askNewRoom(() => {

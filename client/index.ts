@@ -17,6 +17,7 @@ import "./pages/choice";
 import "./pages/no-room";
 import "./pages/results/win";
 import "./pages/results/loose";
+import "./pages/results/both";
 import "./router";
 
 function main() {

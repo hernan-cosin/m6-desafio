@@ -4,25 +4,16 @@ import { Router } from "@vaadin/router";
 
 class Code extends HTMLElement {
   shadow: ShadowRoot;
-  players: ""[] = [];
   connectedCallback() {
-    state.listenToRoom();
-    this.updatePlayers();
-    state.subscribe(() => {
-      this.updatePlayers();
-      this.render();
-      // state.readyToPlay(() => {
-      //   Router.go("/press-play");
-      // });
-    });
+    state.assignPlayerNum();
     this.render();
   }
-  updatePlayers() {
-    const lastState = state.getState();
-    this.players = lastState.players;
-  }
+
   render() {
     state.bothOnline(() => {
+      const lastState = state.getState();
+      lastState["current-game"] = "";
+
       Router.go("/press-play");
     });
     const lastState = state.getState();
@@ -32,11 +23,8 @@ class Code extends HTMLElement {
             <header class="main--header">
               <div class="header--names-container">
                 <c-text variant="custom" custom="24" class="header--name">${
-                  this.players[0] ? this.players[0] + ":" : ""
-                } ${lastState.score ? lastState.score : " "}</c-text>
-                <c-text variant="custom" custom="24" class="header--name">${
-                  this.players[1] ? this.players[1] + ":" : ""
-                } ${lastState.score ? lastState.score : " "}</c-text>
+                  lastState.name ? lastState.name + ":" : ""
+                } </c-text>
               </div>
               <div class="header--room-container">
                 <c-text variant="custom" custom="24" class="room-text">Sala</c-text>

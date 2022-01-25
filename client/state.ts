@@ -1,7 +1,7 @@
 import { rtdb } from "./rtdb";
 import map from "lodash/map";
-const API_BASE_URL = "http://localhost:3000";
-// const API_BASE_URL = "";
+// const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "";
 type User = {
   name: string;
 };
@@ -13,14 +13,11 @@ type Game = {
 const state = {
   data: {
     name: "",
-    //   email: "",
     userId: "",
     roomId: "",
     players: [],
     start: "",
     "current-game": "",
-    //   rtdbRoomId: "",
-    //   messages: [],
   },
   listeners: [],
   getState() {
@@ -31,7 +28,6 @@ const state = {
     for (const cb of this.listeners) {
       cb();
     }
-    localStorage.setItem("saved-state", JSON.stringify(this.getState()));
   },
   subscribe(callback: (any) => any) {
     this.listeners.push(callback);
@@ -39,12 +35,10 @@ const state = {
   setName(name: User) {
     const lastState = this.getState();
     lastState.name = name;
-    this.setState(lastState);
   },
   setRoomId(roomId: string) {
     const lastState = this.getState();
     lastState.roomId = roomId;
-    this.setState(lastState);
   },
   signin(User: User, cb?) {
     fetch(API_BASE_URL + "/signin", {
@@ -60,7 +54,6 @@ const state = {
       .then((data) => {
         const lastState = this.getState();
         lastState.userId = data.id;
-        this.setState(lastState);
       })
       .then(() => {
         if (cb) {
@@ -88,8 +81,6 @@ const state = {
         .then((res) => {
           const lastState = this.getState();
           lastState.roomId = res.id;
-          // lastState.pushKey = res.key;
-          state.setState(lastState);
           if (cb) {
             cb();
           }
@@ -98,8 +89,11 @@ const state = {
       console.error("No hay userId");
     }
   },
-  accessToRoom(cb?) {
+  accessToRoom(cb?, cb2?) {
     const lastState = this.getState();
+
+    const roomId = lastState.roomId;
+    const userId = lastState.userId;
 
     if (lastState.userId) {
       fetch(API_BASE_URL + "/rooms/access", {
@@ -117,39 +111,44 @@ const state = {
           return res.json();
         })
         .then((res) => {
-          console.log(res);
-          // console.log(res.validPlayer);
-          // if (res.validPlayer == true) {
-          // const lastState = this.getState();
-          // lastState.pushKey = res.key;
-          // state.setState(lastState);
-
-          const roomId = lastState.roomId;
-          const userId = lastState.userId;
-
-          fetch(API_BASE_URL + "/rooms/" + roomId + "?userId=" + userId)
-            .then((res) => {
-              return res.json();
-            })
-            .then((data) => {
-              const lastState = this.getState();
-              lastState.rtdbRoomId = data.rtdbRoomId;
-              this.setState(lastState);
-            });
-          if (cb) {
-            cb();
+          if (res.access == true) {
+            fetch(API_BASE_URL + "/rooms/" + roomId + "?userId=" + userId)
+              .then((res) => {
+                return res.json();
+              })
+              .then((data) => {
+                const lastState = this.getState();
+                lastState.rtdbRoomId = data.rtdbRoomId;
+              });
+            if (cb) {
+              cb();
+            }
           }
-          // }
+          if (res.match == true) {
+            fetch(API_BASE_URL + "/rooms/" + roomId + "?userId=" + userId)
+              .then((res) => {
+                return res.json();
+              })
+              .then((data) => {
+                const lastState = this.getState();
+                lastState.rtdbRoomId = data.rtdbRoomId;
+              });
+            if (cb) {
+              cb();
+            }
+          }
+          if (res.match == false) {
+            cb2();
+          }
         });
     } else {
       console.error("No hay userId");
     }
   },
-
   // set in the state the rtdb room ID provided from backend
   connectToRoom(cb?) {
     const lastState = this.getState();
-    console.log(lastState);
+
     const roomId = lastState.roomId;
     const userId = lastState.userId;
 
@@ -160,17 +159,16 @@ const state = {
       .then((data) => {
         const lastState = this.getState();
         lastState.rtdbRoomId = data.rtdbRoomId;
-        this.setState(lastState);
 
-        // console.log(state.getState());
         if (cb) {
           cb();
         }
       });
   },
-  listenToRoom(cb?) {
+  // listen to player added to the rtdb and asigns player0 if the player is the creator of the room
+  // and player player1 if the player is the adversary
+  assignPlayerNum(cb?) {
     const lastState = this.getState();
-    // console.log(lastState);
 
     const chatroomRef = rtdb.ref("/rooms/" + lastState.rtdbRoomId);
     chatroomRef.on("value", (snap) => {
@@ -187,17 +185,18 @@ const state = {
       } else {
         lastState.player = 1;
       }
-      this.setState(lastState);
     });
     if (cb) {
       cb();
     }
   },
+  // listen to rtdb room and if both players are online
+  // execute callback
   bothOnline(cb?) {
     const lastState = this.getState();
 
     const chatroomRef = rtdb.ref("/rooms/" + lastState.rtdbRoomId);
-    chatroomRef.once("value", (snap) => {
+    chatroomRef.on("value", (snap) => {
       const playersFromServer = snap.val()["current-game"];
 
       const online = map(playersFromServer, "online");
@@ -207,10 +206,10 @@ const state = {
       }
     });
   },
+  // set start = true in rtdb
   setStart(val: boolean, player, cb?) {
     const lastState = state.getState();
     lastState.start = val;
-    state.setState(lastState);
 
     fetch(API_BASE_URL + "/rooms/start", {
       method: "post",
@@ -229,6 +228,8 @@ const state = {
       }
     });
   },
+  // listen to rtdb room and if both players set start = true
+  // execute callback
   readyToPlay(cb?) {
     const lastState = this.getState();
 
@@ -243,74 +244,38 @@ const state = {
       }
     });
   },
+  // sets the player choice in the RTDB
   setMove(move: Jugada, cb?) {
-    // sets the player choice in the RTDB
-    // then sets the state to triger the subscribe in the page and listen if both set their move
-    // when true it sets the history in firestor
     const lastState = this.getState();
     lastState["current-game"] = move;
 
-    fetch(API_BASE_URL + "/game/choice", {
+    return fetch(API_BASE_URL + "/game/choice", {
       method: "post",
       headers: {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        // userId: lastState.userId,
         player: lastState.player,
         choice: lastState["current-game"],
         roomId: lastState.rtdbRoomId,
-        // shortId: lastState.roomId,
       }),
-    }).then(() => {
-      state.setState(lastState);
-
-      if (cb) {
-        cb();
-      }
     });
   },
-  setHistory(cb?) {
-    // sets the history in firestore
-    const lastState = this.getState();
-
-    fetch(API_BASE_URL + "/rooms/choice", {
-      method: "post",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        // userId: lastState.userId,
-        player: lastState.player,
-        history: lastState.game,
-        roomId: lastState.roomId,
-        // shortId: lastState.roomId,
-      }),
-    }).then(() => {
-      if (cb) {
-        cb();
-      }
-    });
-  },
+  // listen to rtdb room and if both players set their move
+  // then set the move in the state
+  // execute callback
   bothSetMove(cb?) {
-    // checks if both players have set their move in the RTDB
-    // if true it sets both moves in the state
-    // then ejecute callback
     const lastState = this.getState();
 
     const chatroomRef = rtdb.ref("/rooms/" + lastState.rtdbRoomId);
     chatroomRef.on("value", (snap) => {
       const playersFromServer = snap.val()["current-game"];
 
-      // const choice = map(playersFromServer, "choice");
       const twoPlayersChoices = map(playersFromServer, (p) => {
         return { [p.player]: p.choice };
       });
 
-      if (
-        twoPlayersChoices[0][0] !== undefined &&
-        twoPlayersChoices[1][1] !== undefined
-      ) {
+      if (twoPlayersChoices[0][0] !== "" && twoPlayersChoices[1][1] !== "") {
         lastState.game = [
           {
             ...twoPlayersChoices[0],
@@ -324,10 +289,34 @@ const state = {
       }
     });
   },
+  // sets the history in firestore
+  setHistory(cb?) {
+    const lastState = this.getState();
+
+    if (lastState.player == 0) {
+      fetch(API_BASE_URL + "/rooms/choice", {
+        method: "post",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          player: lastState.player,
+          historyFromFront: lastState.game,
+          roomId: lastState.roomId,
+        }),
+      }).then(() => {
+        if (cb) {
+          cb();
+        }
+      });
+    } else {
+      cb();
+    }
+  },
+  // returns -1 if draw
+  // returns 1 if player one wins
+  // returns 0 if player zero wins
   whoWins(game: Game, cb?) {
-    // returns -1 if draw
-    // returns 1 if player one wins
-    // returns 0 if player zero wins
     if (game[0] == game[1]) {
       return -1;
     }
@@ -350,8 +339,9 @@ const state = {
       return 0;
     }
   },
-  getHistoryFromFirestore(rtdbroomid: string, roomid: string) {
+  getHistoryFromFirestore(rtdbRoomId: string, roomId: string, cb?) {
     const lastState = this.getState();
+
     function whoWins(g) {
       return state.whoWins(g);
     }
@@ -362,21 +352,97 @@ const state = {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        rtdbRoomId: lastState.rtdbRoomId,
-        roomId: lastState.roomId,
+        rtdbRoomId: rtdbRoomId,
+        roomId: roomId,
       }),
     })
       .then((data) => {
         return data.json();
       })
       .then((history) => {
-        console.log(history);
-
         const mapeado = map(history, whoWins);
-        lastState.historyFromFirestore = mapeado;
-        console.log(mapeado);
+        const winPlayerZero = mapeado.filter((g) => {
+          return g == 0;
+        });
+        const winPlayerOne = mapeado.filter((g) => {
+          return g == 1;
+        });
+        lastState.winPlayerZero = winPlayerZero;
+        lastState.winPlayerOne = winPlayerOne;
+      })
+      .then(() => {
+        if (cb) {
+          cb();
+        }
       });
   },
+  rtdbReseter(cb?) {
+    const lastState = this.getState();
+    fetch(API_BASE_URL + "/rtdb/reset/start-choice", {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        rtdbRoomId: lastState.rtdbRoomId,
+        player: lastState.player,
+      }),
+    }).then(() => {
+      if (cb) {
+        cb();
+        lastState["current-game"] = "";
+        lastState.game = [];
+        lastState.winPlayerOne = [];
+        lastState.winPlayerZero = [];
+      }
+    });
+  },
+  resetOnline() {
+    const lastState = this.getState();
+    fetch(API_BASE_URL + "/rtdb/reset/online", {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        rtdbRoomId: lastState.rtdbRoomId,
+        player: lastState.player,
+      }),
+    });
+  },
+  setOnlineTrue() {
+    const lastState = this.getState();
+    fetch(API_BASE_URL + "/rtdb/set/online", {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        rtdbRoomId: lastState.rtdbRoomId,
+        player: lastState.player,
+      }),
+    });
+  },
+  resetStart(cb?) {
+    const lastState = this.getState();
+    fetch(API_BASE_URL + "/rtdb/reset/start", {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        rtdbRoomId: lastState.rtdbRoomId,
+        player: lastState.player,
+      }),
+    }).then(() => {
+      if (cb) {
+        cb();
+      }
+    });
+  },
+  resetGameData() {
+    const lastState = this.getState();
+    lastState.game = [];
+  },
 };
-
 export { state };
