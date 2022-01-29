@@ -64984,9 +64984,7 @@ class Choice extends HTMLElement {
                 e1.target.shadow.firstChild.classList.add("select-move");
                 gameAnimation();
                 const move = e1.target.className.split(" ")[1];
-                _state.state.setMove(move, ()=>{
-                // Router.go("/results/both");
-                });
+                _state.state.setMove(move);
             });
         });
         function gameAnimation() {

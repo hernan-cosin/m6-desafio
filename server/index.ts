@@ -51,10 +51,6 @@ app.post("/signin", (req, res) => {
               res.json({ id: e.ref.path.slice(6), new: false });
             });
           });
-        // res.status(400).json({
-        //   message: "User already exist.",
-
-        // });
       }
     });
 });
@@ -256,7 +252,6 @@ app.post("/rooms/choice", (req, res) => {
           roomsCollection
             .doc(roomId.toString())
             .set({ history }, { merge: true });
-          // roomsCollection.doc(roomId.toString()).update({ history });
         });
     })
     .then(() => {

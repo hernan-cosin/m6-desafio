@@ -22,9 +22,7 @@ class Choice extends HTMLElement {
 
         const move = e.target.className.split(" ")[1];
 
-        state.setMove(move, () => {
-          // Router.go("/results/both");
-        });
+        state.setMove(move);
       });
     });
 
