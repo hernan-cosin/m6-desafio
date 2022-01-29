@@ -36,16 +36,30 @@ class Name extends HTMLElement {
           if (state.getState().roomId.length > 0) {
             // si hay un roomId en el state
             // ingresado a traves de "Ingresar a una sala"
-            state.connectToRoom(() => {
-              state.accessToRoom(
-                () => {
-                  Router.go("/code");
-                },
-                () => {
-                  Router.go("/no-room");
-                }
-              );
-            });
+            state.connectToRoom(
+              () => {
+                state.accessToRoom(
+                  () => {
+                    Router.go("/code");
+                  },
+                  () => {
+                    Router.go("/no-room");
+                  }
+                );
+              },
+              () => {
+                state.setOnlineTrue().then(() => {
+                  state.accessToRoom(
+                    () => {
+                      Router.go("/code");
+                    },
+                    () => {
+                      Router.go("/no-room");
+                    }
+                  );
+                });
+              }
+            );
           } else {
             state.askNewRoom(() => {
               state.connectToRoom(() => {

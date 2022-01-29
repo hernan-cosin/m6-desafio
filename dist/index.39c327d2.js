@@ -3174,6 +3174,14 @@ class Name extends HTMLElement {
                         }, ()=>{
                             _router.Router.go("/no-room");
                         });
+                    }, ()=>{
+                        _state.state.setOnlineTrue().then(()=>{
+                            _state.state.accessToRoom(()=>{
+                                _router.Router.go("/code");
+                            }, ()=>{
+                                _router.Router.go("/no-room");
+                            });
+                        });
                     });
                     else _state.state.askNewRoom(()=>{
                         _state.state.connectToRoom(()=>{
@@ -3204,8 +3212,7 @@ parcelHelpers.export(exports, "state", ()=>state
 var _rtdb = require("./rtdb");
 var _map = require("lodash/map");
 var _mapDefault = parcelHelpers.interopDefault(_map);
-// const API_BASE_URL = "http://localhost:3000";
-const API_BASE_URL = "";
+const API_BASE_URL = "http://localhost:3000";
 const state = {
     data: {
         name: "",
@@ -3310,7 +3317,7 @@ const state = {
         else console.error("No hay userId");
     },
     // set in the state the rtdb room ID provided from backend
-    connectToRoom (cb) {
+    connectToRoom (cb, cb2) {
         const lastState = this.getState();
         const roomId = lastState.roomId;
         const userId = lastState.userId;
@@ -3319,7 +3326,10 @@ const state = {
         }).then((data)=>{
             const lastState1 = this.getState();
             lastState1.rtdbRoomId = data.rtdbRoomId;
-            if (cb) cb();
+            if (cb2 && cb) this.getPlayerNum(()=>{
+                cb2();
+            });
+            if (cb && !cb2) cb();
         });
     },
     // listen to player added to the rtdb and asigns player0 if the player is the creator of the room
@@ -3337,6 +3347,21 @@ const state = {
             else lastState1.player = 1;
         });
         if (cb) cb();
+    },
+    getPlayerNum (cb) {
+        const lastState = this.getState();
+        const chatroomRef = _rtdb.rtdb.ref("/rooms/" + lastState.rtdbRoomId);
+        chatroomRef.get().then((info)=>{
+            const lastState1 = this.getState();
+            const playersFromServer = info.val()["current-game"];
+            const names = _mapDefault.default(playersFromServer, "name");
+            lastState1.players = names;
+            _mapDefault.default(playersFromServer, "player");
+            if (lastState1.name == names[0]) lastState1.player = 0;
+            else lastState1.player = 1;
+        }).then(()=>{
+            if (cb) cb();
+        });
     },
     // listen to rtdb room and if both players are online
     // execute callback
@@ -3515,7 +3540,7 @@ const state = {
     },
     setOnlineTrue () {
         const lastState = this.getState();
-        fetch(API_BASE_URL + "/rtdb/set/online", {
+        return fetch(API_BASE_URL + "/rtdb/set/online", {
             method: "post",
             headers: {
                 "content-type": "application/json"

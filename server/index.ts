@@ -124,7 +124,7 @@ app.post("/rooms/access", (req, res) => {
     .then((doc) => {
       if (doc.exists) {
         const roomRef = rtdb.ref("/rooms/" + roomId + "/current-game");
-        // TESTEANDO EL METODO PARA LA SALA LLENA O NO COINCIDE NOMBRE
+
         roomRef.get().then((snapshot) => {
           if (snapshot.val().length == 1) {
             roomRef
@@ -142,9 +142,25 @@ app.post("/rooms/access", (req, res) => {
               });
           }
           if (snapshot.val().length == 2) {
+            if (snapshot.val()[1].name == undefined) {
+              roomRef
+                .update({
+                  1: {
+                    choice: "",
+                    name: name,
+                    userId: userId,
+                    online: true,
+                    player: 1,
+                  },
+                })
+                .then(() => {
+                  res.json({ access: true });
+                });
+            }
             if (
               name !== snapshot.val()[0].name &&
-              name !== snapshot.val()[1].name
+              name !== snapshot.val()[1].name &&
+              snapshot.val()[1].name !== undefined
             ) {
               res.json({ match: false });
             } else if (
@@ -155,25 +171,6 @@ app.post("/rooms/access", (req, res) => {
             }
           }
         });
-        // HASTA ACÁ
-        //   roomRef
-        //     .update({
-        //       1: {
-        //         choice: "",
-        //         name: name,
-        //         userId: userId,
-        //         online: true,
-        //         player: 1,
-        //       },
-        //     })
-        //     .then(() => {
-        //       // res.json({ key: roomRef.push().key });
-        //       res.status(201).json({ message: "ok" });
-        //     });
-        // } else {
-        //   res.status(401).json({
-        //     message: "No existís",
-        //   });
       }
     });
 });
@@ -182,7 +179,6 @@ app.post("/rooms/access", (req, res) => {
 app.get("/rooms/:roomId", (req, res) => {
   const { userId } = req.query;
   const { roomId } = req.params;
-  // res.json({ userId });
 
   usersCollection
     .doc(userId.toString())
@@ -226,7 +222,6 @@ app.post("/game/choice", (req, res) => {
   const { roomId } = req.body;
   const { player } = req.body;
   const { choice } = req.body;
-  // const { shortId } = req.body;
 
   const roomRef = rtdb.ref("/rooms/" + roomId + "/current-game" + "/" + player);
   roomRef
