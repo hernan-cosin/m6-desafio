@@ -16,7 +16,7 @@ const usersCollection = firestore.collection("users");
 const roomsCollection = firestore.collection("rooms");
 
 app.get("/env-vars", (req, res) => {
-  res.sendStatus(202).json({
+  res.json({
     port: port,
     enviroment: process.env.NODE_ENV,
     test: true,
