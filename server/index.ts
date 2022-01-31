@@ -343,18 +343,6 @@ app.post("/rtdb/reset/start", (req, res) => {
   });
 });
 
-// app.post("/rtdb/set/start", (req, res) => {
-//   const { rtdbRoomId } = req.body;
-//   const { player } = req.body;
-
-//   const roomRef = rtdb.ref(
-//     "/rooms/" + rtdbRoomId + "/current-game" + "/" + player
-//   );
-//   roomRef.update({ start: true }).then(() => {
-//     res.send("set start: true");
-//   });
-// });
-
 app.use(express.static("dist"));
 
 app.get("*", (req, res) => {
