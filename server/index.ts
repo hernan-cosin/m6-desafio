@@ -23,7 +23,8 @@ app.get("/env-vars", (req, res) => {
   });
 });
 
-// creates an user in firestore db and returns its ID. if already exist returns "user already exist"
+// recives a name, if name exists in firestore db respond with id number and new: false.
+// if there is no matching name in firestore db it creates a user and return its id number and new: true
 app.post("/signin", (req, res) => {
   const { name } = req.body;
 
@@ -56,7 +57,8 @@ app.post("/signin", (req, res) => {
 });
 
 // checks if the user ID provided exist, if true creates a room in firestore rtdb
-// in firestore db creates a short room ID, and inside the long room ID from the firestore rtdb
+// in firestore db creates a short room ID, and inside of it stores the long room ID from the firestore rtdb
+// returns the firestore room ID
 app.post("/rooms", (req, res) => {
   const { userId } = req.body;
   const { name } = req.body;
@@ -107,7 +109,8 @@ app.post("/rooms", (req, res) => {
 
 // checks if user ID exists, if true checks if only one player in rtdb room
 // and pushes player two
-// if there are two players and the name provided dosn't match any in the rtdb
+// if name in player two is not set yet and is equal to undefined pushes player two
+// if there are two players and the name provided dosn't match any in the rtdb and also is not undefined
 // returns match false, if matches returns match true
 app.post("/rooms/access", (req, res) => {
   const { userId } = req.body;
@@ -289,7 +292,7 @@ app.post("/rooms/history", (req, res) => {
     });
 });
 
-// recives a rtdbroomid and the number of the player and reset the start to false and the choice to empty
+// recives a rtdbroomid and the number of the player and set the start to false and the choice to empty
 app.post("/rtdb/reset/start-choice", (req, res) => {
   const { rtdbRoomId } = req.body;
   const { player } = req.body;
@@ -298,10 +301,11 @@ app.post("/rtdb/reset/start-choice", (req, res) => {
     "/rooms/" + rtdbRoomId + "/current-game" + "/" + player
   );
   roomRef.update({ choice: "", start: false }).then(() => {
-    res.send("server: se reseteo");
+    res.send("reset choice and start values: true");
   });
 });
 
+// recives a rtdbroomid and the number of the player and set the online to false
 app.post("/rtdb/reset/online", (req, res) => {
   const { rtdbRoomId } = req.body;
   const { player } = req.body;
@@ -310,10 +314,11 @@ app.post("/rtdb/reset/online", (req, res) => {
     "/rooms/" + rtdbRoomId + "/current-game" + "/" + player
   );
   roomRef.update({ online: false }).then(() => {
-    res.send("server: se reseteo el online");
+    res.send("reset online: true");
   });
 });
 
+// recives a rtdbroomid and the number of the player and set the online to false
 app.post("/rtdb/set/online", (req, res) => {
   const { rtdbRoomId } = req.body;
   const { player } = req.body;
@@ -322,7 +327,7 @@ app.post("/rtdb/set/online", (req, res) => {
     "/rooms/" + rtdbRoomId + "/current-game" + "/" + player
   );
   roomRef.update({ online: true }).then(() => {
-    res.send("server: se seteo el online");
+    res.send("set online: true");
   });
 });
 
@@ -334,21 +339,21 @@ app.post("/rtdb/reset/start", (req, res) => {
     "/rooms/" + rtdbRoomId + "/current-game" + "/" + player
   );
   roomRef.update({ start: false }).then(() => {
-    res.send("server: se reseteo el start");
+    res.send("reset start: true");
   });
 });
 
-app.post("/rtdb/set/start", (req, res) => {
-  const { rtdbRoomId } = req.body;
-  const { player } = req.body;
+// app.post("/rtdb/set/start", (req, res) => {
+//   const { rtdbRoomId } = req.body;
+//   const { player } = req.body;
 
-  const roomRef = rtdb.ref(
-    "/rooms/" + rtdbRoomId + "/current-game" + "/" + player
-  );
-  roomRef.update({ start: true }).then(() => {
-    res.send("server: se seteo el start");
-  });
-});
+//   const roomRef = rtdb.ref(
+//     "/rooms/" + rtdbRoomId + "/current-game" + "/" + player
+//   );
+//   roomRef.update({ start: true }).then(() => {
+//     res.send("set start: true");
+//   });
+// });
 
 app.use(express.static("dist"));
 

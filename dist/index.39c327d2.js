@@ -3385,7 +3385,6 @@ const state = {
                 "content-type": "application/json"
             },
             body: JSON.stringify({
-                // userId: lastState.userId,
                 start: lastState.start,
                 player: player,
                 roomId: lastState.rtdbRoomId
