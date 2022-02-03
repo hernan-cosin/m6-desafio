@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import { state } from "../client/state";
 import map from "lodash/map";
 import firebase from "firebase";
+import * as path from "path";
 
 const app = express();
 app.use(express.json());
@@ -343,10 +344,11 @@ app.post("/rtdb/reset/start", (req, res) => {
   });
 });
 
+const relativeRoute = path.resolve(__dirname, "../dist/", "index.html");
 app.use(express.static("dist"));
 
 app.get("*", (req, res) => {
-  res.sendFile(__dirname + "/dist/index.html");
+  res.sendFile(relativeRoute);
 });
 
 app.listen(port, () => {
