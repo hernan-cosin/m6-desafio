@@ -3212,8 +3212,7 @@ parcelHelpers.export(exports, "state", ()=>state
 var _rtdb = require("./rtdb");
 var _map = require("lodash/map");
 var _mapDefault = parcelHelpers.interopDefault(_map);
-// const API_BASE_URL = "http://localhost:3000";
-const API_BASE_URL = "";
+const API_BASE_URL = "http://localhost:3000";
 const state = {
     data: {
         name: "",
@@ -64908,6 +64907,12 @@ function initCounter() {
                 const num = div.querySelector(".counter");
                 num.innerHTML = `${counter}`;
                 counter--;
+                if (counter == 0) {
+                    const event = new CustomEvent("firstTimeOut", {
+                        bubbles: true
+                    });
+                    this.dispatchEvent(event);
+                }
                 if (counter < 0) {
                     clearInterval(intervalo);
                     displayNoPlayText();
@@ -64980,10 +64985,12 @@ class Choice extends HTMLElement {
         ];
         jugadas.map((e)=>{
             e.addEventListener("click", (e1)=>{
-                e1.target.shadow.firstChild.classList.add("select-move");
-                gameAnimation();
-                const move = e1.target.className.split(" ")[1];
-                _state.state.setMove(move);
+                this.addEventListener("firstTimeOut", ()=>{
+                    e1.target.shadow.firstChild.classList.add("select-move");
+                    gameAnimation();
+                    const move = e1.target.className.split(" ")[1];
+                    _state.state.setMove(move);
+                });
             });
         });
         function gameAnimation() {
@@ -65269,7 +65276,7 @@ class resultsBoth extends HTMLElement {
             if (resultWhoWins == -1) _router.Router.go("/press-play");
             if (lastState1.player == resultWhoWins) _router.Router.go("/results/win");
             if (lastState1.player !== resultWhoWins && resultWhoWins !== -1) _router.Router.go("/results/loose");
-        }, 2500);
+        }, 2750);
     }
     render() {
         this.innerHTML = `\n        <section class="main">\n            <div class="oponent--jugada-container">\n              <c-play class="jugada piedra" play="piedraLarge"></c-play>\n              <c-play class="jugada papel" play="papelLarge"></c-play>\n              <c-play class="jugada tijera" play="tijeraLarge"></c-play>\n            </div>\n            <div class="main--jugada-container">\n              <c-play class="jugada piedra" play="piedraLarge"></c-play>\n              <c-play class="jugada papel" play="papelLarge"></c-play>\n              <c-play class="jugada tijera" play="tijeraLarge"></c-play>\n            </div>\n        </section>\n\n        `;

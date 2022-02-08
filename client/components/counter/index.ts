@@ -23,6 +23,10 @@ export function initCounter() {
         const num = div.querySelector(".counter");
         num.innerHTML = `${counter}`;
         counter--;
+        if (counter == 0) {
+          const event = new CustomEvent("firstTimeOut", { bubbles: true });
+          this.dispatchEvent(event);
+        }
         if (counter < 0) {
           clearInterval(intervalo);
           displayNoPlayText();

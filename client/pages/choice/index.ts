@@ -16,13 +16,12 @@ class Choice extends HTMLElement {
     const jugadas = [piedraEl, papelEl, tijeraEl];
     jugadas.map((e: any) => {
       e.addEventListener("click", (e) => {
-        e.target.shadow.firstChild.classList.add("select-move");
-
-        gameAnimation();
-
-        const move = e.target.className.split(" ")[1];
-
-        state.setMove(move);
+        this.addEventListener("firstTimeOut", () => {
+          e.target.shadow.firstChild.classList.add("select-move");
+          gameAnimation();
+          const move = e.target.className.split(" ")[1];
+          state.setMove(move);
+        });
       });
     });
 

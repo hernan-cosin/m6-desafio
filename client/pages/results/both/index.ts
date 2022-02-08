@@ -95,7 +95,7 @@ class resultsBoth extends HTMLElement {
       if (lastState.player !== resultWhoWins && resultWhoWins !== -1) {
         Router.go("/results/loose");
       }
-    }, 2500);
+    }, 2750);
   }
   render() {
     this.innerHTML = `
